@@ -7,17 +7,17 @@ import PostComponent from "../components/PostComponent";
 const posts = [
   {
     id: 1,
-    username: "@sarah",
-    caption: "Studying React today!",
+    username: "@person1",
+    caption: "building a rocket",
   },
   {
     id: 2,
-    username: "@john",
-    caption: "Finished Practical 4.",
+    username: "@person2",
+    caption: "made a ring",
   },
   {
     id: 3,
-    username: "@leanne",
+    username: "@person3",
     caption: "Sunset over campus.",
   },
 ];

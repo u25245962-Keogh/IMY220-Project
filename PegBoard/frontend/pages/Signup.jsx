@@ -36,6 +36,8 @@ function SignUp() {
       );
       return;
     }
+
+    
     try{
       const response = await fetch("/api/signup", {
         method: "POST",
