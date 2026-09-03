@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Love+Ya+Like+A+Sister&family=Rubik+Spray+Paint&display=swap');
+.rubik-spray-paint-regular {
+    font-family: "Rubik Spray Paint", system-ui;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+
+div.Navigation{
+    background-color: rgb(255, 153, 0);
+   width: 100%;
+    
+    display: flex;
+    flex-direction: column;
+    font-family: "Love Ya Like A Sister", cursive;
+    
+  color: black;
+  filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.3));
+ 
+}
+.pageName{
+  z-index: 1;
+  position: absolute;
+}
+
+.header{
+
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-self: right;
+  top: 0px;
+  z-index: 2;
+  position: absolute;
+}
+h1{
+    font-family: "Rubik Spray Paint", system-ui;
+    font-weight: 400;
+  font-style: normal;
+}
+
+
+  
+div.navList{
+    text-align: center;
+}
+
+ul{
+    display: flex;
+    flex-direction: column;
+   
+   
+}
+a{
+  
+    font-size: 35px;
+    text-decoration: none;
+    color: black;
+}
+.navImage > img{
+ height: 150px;
+}
+

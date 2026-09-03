@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Love+Ya+Like+A+Sister&family=Rubik+Spray+Paint&display=swap');
+
+
+
+
+.logoSplash{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+   
+}
+.logoSplash > p{
+    font-family: "Love Ya Like A Sister", cursive;
+    font-size: 1.5em;
+    margin: 0px;
+
+}
+
+.L-button{
+    background-color: #e55812;
+    width: 15em;
+    border-radius: 10px;
+   
+}
+.L-button:hover{
+    background-color: #f56b26;
+  
+   
+}
+.L-button > a{
+    font-family: "Love Ya Like A Sister", cursive;
+    color: white;
+}
+
+.S-button{
+    background-color: #95c623;
+    
+    width: 15em;
+    border-radius: 10px;
+}
+
+.S-button:hover{
+    background-color: #abdd36;
+   
+}
+.S-button > a{
+    
+    font-family: "Love Ya Like A Sister", cursive;
+    color: white;
+    
+}
+.SL-buttons{
+    text-align: center;
+    display: flex;
+    justify-self: center;
+    gap: 50px;  
+}
+
