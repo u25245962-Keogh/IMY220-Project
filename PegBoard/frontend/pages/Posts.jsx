@@ -1,4 +1,4 @@
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 import Post from "./Post";
 import { Link } from "react-router-dom";
 import ProfilePreview from "../components/ProfilePreview";
@@ -31,8 +31,7 @@ function Posts() {
           <div key={post.id}>
             <PostComponent username={post.username} />
             <Link to={`/posts/${post.id}`}>
-              {" "}
-              <ProfilePreview />
+             more
             </Link>
           </div>
         ))}
