@@ -1,6 +1,5 @@
 node_modules
-dist
 .git
 .gitignore
 docker-compose.yml
-npm-debug.log*
+

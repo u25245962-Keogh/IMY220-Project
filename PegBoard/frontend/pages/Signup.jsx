@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 
 function SignUp() {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const passwordRegex = /^(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const [password, setPassword] = useState("");
 
-const navigate = useNavigate();
+  const [error, setError] = useState("");
+
+ const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,19 +18,22 @@ const navigate = useNavigate();
       return;
     }
 
-    if (username.length < 3) {
-        setError("Username must be at least 3 characters long");
+    if (username.length < 5) {
+        setError("Username must be at least 5 characters long");
         return;
     }
+    const regexP = /^(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+    const regexE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(email)) {
+    if (!regexE.test(email)) {
       setError("Please enter a valid email address");
       return;
-      
     } 
 
-    if(!passwordRegex.test(password)) {
-      setError("Password must be at least 8 characters long and contain at least one uppercase letter and one symbol.");
+    if (!regexP.test(password)) {
+      setError(
+        "Password must be at least 8 characters long, have a symbol and have one uppercase and one lowercase character",
+      );
       return;
     }
     try{
@@ -40,17 +42,19 @@ const navigate = useNavigate();
         headers: {
           "Content-Type": "application/json",
         },
+
         body: JSON.stringify({ username, email, password }),
       });
+
       const data = await response.json();
 
       if(response.ok){
-        console.log("SignUp successful:", data);
-        setError("SignUp successful");
+        console.log("sign up valid:", data);
+        setError("sign up error");
         navigate("/home");
       }
       else{
-        setError(data.message || "SignUp failed");
+        setError(data.message || "signing up failed");
       }
     }
     catch (error){
