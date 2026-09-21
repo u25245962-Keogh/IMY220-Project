@@ -14,13 +14,11 @@
     font-family: "Love Ya Like A Sister", cursive;
     font-size: 1.9em;
     margin: 15px;
-    margin-top: 10px;
+   background-color: #fafafa;
     
 
 }
-.Logo{
-    margin: 50px;
-}
+
 
 .L-button{
     background-color: #e55812;
@@ -60,5 +58,45 @@
     display: flex;
     justify-self: center;
     gap: 50px;  
+   position: relative;
+   top: 650px;
 }
 
+.splashImages{
+    height: 300px;
+    position: absolute;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-out;
+}
+
+.splashImages:hover{
+  transform:  translate(5px,5px);
+
+
+}
+
+#wood{
+    top:210px;
+    right: 700px;
+    z-index: 1;
+
+}
+#sculpture{
+    top:220px;
+    left:700px;
+    z-index: 4;
+}
+
+
+#printing{
+z-index: 3;
+top: 450px;
+left: 700px;
+height: 300px;  
+}
+
+#candle{
+    z-index: 2;
+    top: 440px;
+    right: 680px;
+}

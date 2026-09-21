@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import "../styles/login.css";
 import { Navigate, useNavigate } from "react-router-dom";
+import loginTools from "../assests/logintools.png";
+import woodgrain from "../assests/grain.jpeg.jpg"
+import logo from "../assests/logo.png";
+import { Link } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -61,21 +65,47 @@ function Login() {
       
     };
 
-    return (
-        <main className="loginForm">
-            <h1>Welcome back!</h1>
-            <form onSubmit={handleSubmit} noValidate id="loginForm">
-                <label htmlFor="email">Email</label>
-                <input id="email" name="email" type="email" required onChange={handleEmail}/>
+  return (
+    <div id="loginSplit">
+      <div className="loginForm">
+        <img src={logo} id="Logo" />
+        <img src={woodgrain} id="grain"></img>
+        <h1 id="welcomeBack">Welcome back!</h1>
 
-                <label htmlFor="password">Password</label>
-                <input id="password" name="password" type="password" required  onChange={handlePassword}/>
+        <form onSubmit={handleSubmit} noValidate id="loginForm">
+          <div id="orangeBox">
+            <p id="loginTo">login to pegboard</p>
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              onChange={handleEmail}
+            />
 
-                <button type="submit">Login</button>
-                {error && <p role="alert">{error}</p>}
-            </form>
-        </main>
-    );
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              onChange={handlePassword}
+            />
+          </div>
+          <button type="submit">Login</button>
+          {error && <p role="alert">{error}</p>}
+        </form>
+
+        <p id="dontHaveAccount">
+          Dont have an account? <Link to="/signup">Sign-up </Link>
+        </p>
+      </div>
+      <div id="loginTools">
+        <img src={loginTools}></img>
+      </div>
+    </div>
+  );
 }
 
 export default Login;
