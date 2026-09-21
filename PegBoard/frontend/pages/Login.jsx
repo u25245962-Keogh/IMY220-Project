@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import "../styles/login.css";
+import { Navigate, useNavigate } from "react-router-dom";
 
 function Login() {
-      const [username, setUsername] = useState("");
-      const [password, setPassword] = useState("");
-      const [error, setError] = useState("");
-    
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  
+  const handleEmail =  (e) => {
+    e.preventDefault();
+    setEmail(e.target.value);
+  //  console.log(email)
+  }
+  const handlePassword =  (e) => {
+    e.preventDefault();
+    setPassword(e.target.value);
+   // console.log(password);
+  }
 
+  const navigate = useNavigate();
     const handleSubmit = async (e) => {
       e.preventDefault();
 
-      if (username === "" || password === "") {
+      if (email === "" || password === "") {
         setError("Fill in all fields");
         return;
       }
@@ -22,18 +35,19 @@ function Login() {
       setError("Login details are valid.");
 
       try {
-        const response = await fetch("/api/login", {
+        const response = await fetch("http://localhost:3000/api/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ email, password }),
         });
         const data = await response.json();
         if (response.ok) {
           console.log("Login successful:", data);
           setError("Login successful");
-          navigate("/home");
+          navigate("/home")
+          
         } else {
           setError(data.message || "Invalid username or password");
         }
@@ -41,17 +55,21 @@ function Login() {
         console.error(error);
         setError("failed to connect to the server");
       }
+
+     
+        
+      
     };
 
     return (
         <main className="loginForm">
-            <h1>Login</h1>
-            <form onSubmit={handleSubmit} noValidate>
+            <h1>Welcome back!</h1>
+            <form onSubmit={handleSubmit} noValidate id="loginForm">
                 <label htmlFor="email">Email</label>
-                <input id="email" name="email" type="email" required />
+                <input id="email" name="email" type="email" required onChange={handleEmail}/>
 
                 <label htmlFor="password">Password</label>
-                <input id="password" name="password" type="password" required />
+                <input id="password" name="password" type="password" required  onChange={handlePassword}/>
 
                 <button type="submit">Login</button>
                 {error && <p role="alert">{error}</p>}
