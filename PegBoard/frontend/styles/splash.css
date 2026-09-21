@@ -12,9 +12,14 @@
 }
 .logoSplash > p{
     font-family: "Love Ya Like A Sister", cursive;
-    font-size: 1.5em;
-    margin: 0px;
+    font-size: 1.9em;
+    margin: 15px;
+    margin-top: 10px;
+    
 
+}
+.Logo{
+    margin: 50px;
 }
 
 .L-button{

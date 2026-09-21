@@ -21,7 +21,7 @@ function Navbar(props) {
           </div>
           <div className="navList">
             <ul>
-              <Link to="/">Home </Link>
+              <Link to="/home">Home </Link>
               <Link to="/posts">Posts </Link>
               <Link to="/profile">Profile </Link>
             </ul>

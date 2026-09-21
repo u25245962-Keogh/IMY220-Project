@@ -7,7 +7,7 @@ function Splash() {
   return (
     <>
       <div className="logoSplash">
-        <img src={logo} />
+        <img src={logo} className="Logo"/>
         <p>Share Your Creations</p>
       </div>
       <div className="SL-buttons">
