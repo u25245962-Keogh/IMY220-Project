@@ -1,0 +1,149 @@
+#signupFormDiv{
+    background-color: #a3d332;
+    display: flex;
+    flex-direction: column;
+    justify-self: center;
+  width: 490px;
+    border-radius: 5px;
+    box-shadow: 7px 7px 10px rgba(0, 0, 0, 0.295);
+    padding: 10px;
+
+}
+#SUh2{
+    font-family: "Rubik Spray Paint", system-ui;
+    font-weight: 400;
+  font-style: normal;
+ color: #e55812;
+ text-align: center;
+ font-size: 2.5em;
+ margin-top: 0px;
+}
+#SUh1{
+    margin-top: 50px;
+    text-align: center;
+    font-size: 5em;
+    margin-bottom: 0%;
+
+}
+#SUh3{
+
+    font-size: 25px;
+    z-index: 2;
+    color: white;
+    
+    font-family: "Love Ya Like A Sister";
+    padding-left: 10px;
+    width: 50%;
+}
+#signUpLogo{
+    position: absolute;
+    z-index: 3;
+    top: 0%;
+    left: 0%;
+    height: 40px;
+}
+
+.signupInput{
+    margin: 15px;
+    margin-bottom: 30px;
+    width: 70%;
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+  margin-left: 20px;
+  align-self: center;
+  margin-top: 0%;
+ 
+}
+.signupInput:hover{
+    background-color:#d7eea2;
+}
+
+.signupInput:focus{
+    background-color: #e1ff9a;
+    outline: none;
+}
+.signupLabel{
+    color: white;
+    align-self: flex-start;
+    font-family: "Love Ya Like A Sister";
+    font-size: 20px;
+   margin-left: 14%;
+   margin-bottom: 0px;
+
+}
+
+#signupButton{
+    padding: 10px;
+   
+   margin: 20px;
+   background-color:  #e55812;
+   width: 15em;
+   border-radius: 10px;
+   font-family: "Love Ya Like A Sister", cursive;
+   color: white;
+   font-size: 1.5em;
+   border: none;
+   box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.295);
+}
+#signupError{
+    font-family: "Love Ya Like A Sister", cursive;
+    color: rgb(7, 0, 0);
+    font-size: 20px;
+    text-align: center;
+    margin-top: 0px;
+}
+
+#signupButton:hover{
+    background-color:  #ff712a;
+   
+}
+#signupButtonDiv{
+    text-align: center;
+}
+
+#haveAccount{
+    position: absolute;
+    bottom: 1px;
+  font-size: 25px;
+    z-index: 2;
+    color: rgb(0, 0, 0);
+    left: 770px;
+    font-family: "Love Ya Like A Sister";
+}
+#haveAccount > a{
+  
+   font-size: 25px;
+   color: rgb(0, 0, 0);
+}
+#haveAccount > a:hover{
+  
+  
+    color: #ff712a;
+ }
+
+ #SUwood{
+    top:500px;
+    left: 350px;
+    z-index: 1;
+
+}
+#SUsculpture{
+    top:190px;
+    left:250px;
+    z-index: 4;
+}
+
+
+#SUprinting{
+z-index: 3;
+top: 100px;
+right: 230px;
+height: 300px;  
+}
+
+#SUcandle{
+    z-index: 2;
+    top: 440px;
+    right: 300px;
+}
