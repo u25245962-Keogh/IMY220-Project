@@ -27,12 +27,12 @@ function Login() {
       e.preventDefault();
 
       if (email === "" || password === "") {
-        setError("Fill in all fields");
+        setError("Fill in all fields!");
         return;
       }
 
       if (!email.includes("@")) {
-        setError("Please enter a valid email address.");
+        setError("Please enter a valid email address!");
         return;
       }
 
@@ -53,11 +53,11 @@ function Login() {
           navigate("/home")
           
         } else {
-          setError(data.message || "Invalid username or password");
+          setError(data.message || "Invalid username or password!");
         }
       } catch (error) {
         console.error(error);
-        setError("failed to connect to the server");
+        setError("failed to connect to the server.");
       }
 
      
@@ -70,31 +70,45 @@ function Login() {
       <div className="loginForm">
         <img src={logo} id="Logo" />
         <img src={woodgrain} id="grain"></img>
-        <h1 id="welcomeBack">Welcome back!</h1>
+        <div id="welcomeBack">
+          <h1>Welcome back!</h1>
+        </div>
 
         <form onSubmit={handleSubmit} noValidate id="loginForm">
           <div id="orangeBox">
             <p id="loginTo">login to pegboard</p>
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email" className="loginLabel">
+              Email
+            </label>
             <input
               id="email"
               name="email"
               type="email"
               required
               onChange={handleEmail}
+              className="loginInput"
             />
 
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password" className="loginLabel">
+              Password
+            </label>
             <input
               id="password"
               name="password"
               type="password"
               required
               onChange={handlePassword}
+              className="loginInput"
             />
           </div>
-          <button type="submit">Login</button>
-          {error && <p role="alert">{error}</p>}
+          <button type="submit" id="loginButton">
+            Login
+          </button>
+          {error && (
+            <p role="alert" id="loginError">
+              {error}
+            </p>
+          )}
         </form>
 
         <p id="dontHaveAccount">
