@@ -3,7 +3,7 @@ import "../styles/login.css";
 import { Navigate, useNavigate } from "react-router-dom";
 import loginTools from "../assests/logintools.png";
 import woodgrain from "../assests/grain.jpeg.jpg"
-import logo from "../assests/logo.png";
+import logo from "../assests/logoWhite.png";
 import { Link } from "react-router-dom";
 
 function Login() {
@@ -68,7 +68,10 @@ function Login() {
   return (
     <div id="loginSplit">
       <div className="loginForm">
-        <img src={logo} id="Logo" />
+        <Link to={"/"} id="Logo">
+          <img src={logo} id="Logo" />
+        </Link>
+
         <img src={woodgrain} id="grain"></img>
         <div id="welcomeBack">
           <h1>Welcome back!</h1>
@@ -84,6 +87,7 @@ function Login() {
               id="email"
               name="email"
               type="email"
+              placeholder="example@mail.com"
               required
               onChange={handleEmail}
               className="loginInput"
@@ -96,6 +100,7 @@ function Login() {
               id="password"
               name="password"
               type="password"
+              placeholder="**********"
               required
               onChange={handlePassword}
               className="loginInput"

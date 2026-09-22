@@ -128,7 +128,9 @@ function SignUp() {
           already have an account? <Link to="/login">Login</Link>
         </p>
       </div>
-      <img src={logo} id="signUpLogo" />
+         <Link to={"/"} id="signUpLogo">
+                <img src={logo} id="signUpLogo" />
+              </Link>
       <img src={sculpture} id="SUsculpture" className="splashImages" />
       <img src={printing3D} id="SUprinting" className="splashImages" />
       <img src={candle} id="SUcandle" className="splashImages" />
