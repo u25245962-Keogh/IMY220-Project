@@ -298,6 +298,44 @@ app.delete("/api/albums/:id", async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 });
+app.patch("/api/albums/:id", async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const editableFields = ["name", "description", "hashtags"];
+    const updates = Object.fromEntries(
+      editableFields
+        .filter((field) =>
+          Object.prototype.hasOwnProperty.call(req.body, field),
+        ) //  do any of the allowed fields exist in body
+        .map((field) => [field, req.body[field]]), // turn into this ["asdasd" : "sdaas"]
+    );
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "No profile fields provided" });
+    }
+
+    const db = getDB();
+    const collection = db.collection("albums");
+    const query = { _id: new ObjectId(req.params.id) };
+    const result = await collection.updateOne(query, { $set: updates });
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: "Album not found" });
+    }
+
+    const album = await collection.findOne(query, {
+      projection: { password: 0 },
+    });
+    return res.status(200).json(album);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
+  }
+});
 
 
 
