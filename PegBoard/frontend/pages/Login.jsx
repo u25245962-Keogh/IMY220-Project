@@ -36,7 +36,7 @@ function Login() {
         return;
       }
 
-      setError("Login details are valid.");
+      //setError("Login details are valid.");
 
       try {
         const response = await fetch("http://localhost:3000/api/login", {
@@ -60,9 +60,6 @@ function Login() {
         setError("failed to connect to the server.");
       }
 
-     
-        
-      
     };
 
   return (

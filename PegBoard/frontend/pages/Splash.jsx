@@ -11,7 +11,7 @@ function Splash() {
   return (
     <>
       <div className="logoSplash">
-        <img src={logo} id="Logo" />
+        <img src={logo} id="LogoSplash" />
         <img src={sculpture} id="sculpture" className="splashImages" />
         <img src={printing3D} id="printing" className="splashImages" />
         <img src={candle} id="candle" className="splashImages" />

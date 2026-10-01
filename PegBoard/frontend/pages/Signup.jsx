@@ -47,7 +47,7 @@ function SignUp() {
 
     
     try{
-      const response = await fetch("/api/signup", {
+      const response = await fetch("http://localhost:3000/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +61,8 @@ function SignUp() {
       if(response.ok){
         console.log("sign up valid:", data);
         setError("sign up error");
-        navigate("/home");
+        //await delay(2000);
+        navigate("/login");
       }
       else{
         setError(data.message || "signing up failed");
