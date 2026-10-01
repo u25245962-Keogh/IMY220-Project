@@ -53,6 +53,43 @@ app.get("/api/posts:id", async (req, res) => {
   }
 });
 
+app.post("/api/posts", async (req, res) => {
+  try {
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      return res.status(400).json({ message: "Post data is required" });
+    }
+
+    const newPost = {
+      ...req.body,
+      likes: 0,
+      comments: [],
+    };
+
+    const { postUser, caption, hastags, image } = newPost;
+    const validPost =
+      typeof postUser === "string" && postUser.trim().length > 0 &&
+      typeof caption === "string" && caption.trim().length > 0 &&
+      Array.isArray(hastags) && hastags.every((hashtag) => typeof hashtag === "string") 
+     // typeof image === "string" && image.trim().length > 0 &&
+     // Number.isInteger(newPost.likes) && newPost.likes === 0 &&
+     // Array.isArray(newPost.comments);
+
+    if (!validPost) {
+      return res.status(400).json({
+        message: "Invalid post: expected postUser, caption, hastags, image, and username",
+      });
+    }
+
+    const db = getDB();
+    const collection = db.collection("posts");
+    const result = await collection.insertOne(newPost);
+
+    return res.status(201).json({ _id: result.insertedId, ...newPost });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 app.get(`/api/users`, async (req, res) => {
   try {
     const db = getDB();
@@ -107,7 +144,7 @@ app.patch("/api/users/:id", async (req, res) => {
     const updates = Object.fromEntries(
       editableFields
         .filter((field) => Object.prototype.hasOwnProperty.call(req.body, field))//  do any of the allowed fields exist in body
-        .map((field) => [field, req.body[field]])
+        .map((field) => [field, req.body[field]])// turn into this ["asdasd" : "sdaas"]
     );
 
     if (Object.keys(updates).length === 0) {
