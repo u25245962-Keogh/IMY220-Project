@@ -90,6 +90,80 @@ app.post("/api/posts", async (req, res) => {
   }
 });
 
+app.post("/api/posts/:id/comments", async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const comment = req.body?.comment;
+    const validComment =
+      (typeof comment === "string" && comment.trim().length > 0) ||
+      (comment !== null && typeof comment === "object" && !Array.isArray(comment));
+
+    if (!validComment) {
+      return res.status(400).json({ message: "Please put a valid comment" });
+    }
+
+    const collection = getDB().collection("posts");
+    const query = { _id: new ObjectId(req.params.id) };
+    const result = await collection.updateOne(query, { $push: { comments: comment } });//finds post and appends to comments array
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const post = await collection.findOne(query);
+    return res.status(200).json(post);
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.post("/api/posts/:id/likes", async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid post id" });
+    }
+
+    const collection = getDB().collection("posts");
+    const query = { _id: new ObjectId(req.params.id) };
+    const result = await collection.updateOne(query, { $inc: { likes: 1 } });
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    return res.status(200).json(await collection.findOne(query));
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.delete("/api/posts/:id/likes", async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid post id" });
+    }
+
+    const collection = getDB().collection("posts");
+    const query = { _id: new ObjectId(req.params.id) };
+    const result = await collection.updateOne(
+      { ...query, likes: { $gt: 0 } }, //if the likes are at 0 already, dont decement
+      { $inc: { likes: -1 } }//decrement
+    );
+
+    const post = await collection.findOne(query);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    return res.status(200).json(post);
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 app.get(`/api/users`, async (req, res) => {
   try {
     const db = getDB();
@@ -336,6 +410,8 @@ app.patch("/api/albums/:id", async (req, res) => {
       .json({ message: "Server error", error: error.message });
   }
 });
+
+
 
 
 
