@@ -205,6 +205,26 @@ app.post("/api/logout", (req, res) => {
   res.status(200).json({ message: "Logout successful" });
 });
 
+app.delete("/api/posts/:id", async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const db = getDB();
+    const collection = db.collection("posts");
+    const result = await collection.deleteOne({ _id: new ObjectId(req.params.id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    return res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 app.post("/api/signup", async(req, res) => {
   try {
     const db = getDB();
