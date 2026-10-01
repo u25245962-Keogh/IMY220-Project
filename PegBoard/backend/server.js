@@ -103,10 +103,10 @@ app.patch("/api/users/:id", async (req, res) => {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    const editableFields = ["name", "firstName", "lastName", "email", "username", "bio", "avatar", "profilePicture"];
+    const editableFields = ["name", "surname", "username", "email", "bio"];
     const updates = Object.fromEntries(
       editableFields
-        .filter((field) => Object.prototype.hasOwnProperty.call(req.body, field))
+        .filter((field) => Object.prototype.hasOwnProperty.call(req.body, field))//  do any of the allowed fields exist in body
         .map((field) => [field, req.body[field]])
     );
 
