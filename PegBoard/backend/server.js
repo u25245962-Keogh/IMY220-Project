@@ -275,7 +275,29 @@ app.get("/api/albums/:id", async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+app.delete("/api/albums/:id", async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
 
+    const db = getDB();
+    const collection = db.collection("albums");
+    const result = await collection.deleteOne({
+      _id: new ObjectId(req.params.id),
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    return res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
+  }
+});
 
 
 
