@@ -242,6 +242,40 @@ app.post("/api/signup", async(req, res) => {
   }
 });
  
+app.get("/api/albums", async (req, res) => {
+ 
+  try {
+    const db = getDB();
+
+    const collection = db.collection("albums");
+    const albums = await collection.find().toArray();
+
+    res.status(200).json(albums);
+  } catch (error) {
+    // Handle database or server errors
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.get("/api/albums/:id", async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    const db = getDB();
+
+    const collection = db.collection("albums");
+    const query = { _id: new ObjectId(req.params.id) };
+
+    const album = await collection.findOne(query);
+
+    res.status(200).json(album);
+  } catch (error) {
+    // Handle database or server errors
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 
 
 
