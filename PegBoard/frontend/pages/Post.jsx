@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams } from "react-router";
+import { useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import PostDisplay from "../components/PostDisplay";
 import ImageComponent from "../components/ImageComponent";
@@ -8,45 +8,61 @@ import EditPost from "../components/EditPost";
 import "../styles/Posts.css";
 
 function Post() {
-  let params = useParams();
-  const postId = params.id;
-  const [showEditPost, setShowEditPost] = useState(false);
+  const { id: postId } = useParams();
+  const { state } = useLocation();
+  const [post, setPost] = useState(state?.post ?? null);
+  const [error, setError] = useState("");
 
-  const handleSaveEdit = (updatedData) => {
-    console.log("Post updated:", updatedData);
-    setShowEditPost(false);
-    
-  };
+  useEffect(() => {
+    if (post) return;
+
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/posts/${postId}`);
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || "Could not fetch post");
+        }
+        setPost(data);
+      } catch (fetchError) {
+        setError(fetchError.message || "Failed to connect to the server.");
+      }
+    };
+
+    fetchPost();
+  }, [post, postId]);
+
+
 
   return (
     <>
       <Navbar name="Post"></Navbar>
       <div className="post-page">
         <div className="post-main">
-          <h2>Post ID {postId}</h2>
-          
           <section className="post-image-section">
-            <ImageComponent />
+            <ImageComponent src={post?.image} alt={post?.caption || "Post image"} />
           </section>
 
           <section className="post-details-section">
-            <PostDisplay postId={postId} />
-            <button 
-              className="edit-post-btn"
-              onClick={() => setShowEditPost(!showEditPost)}
-            >
-              {showEditPost ? "Cancel" : "Edit Post"}
-            </button>
+            {error && <p role="alert">{error}</p>}
+            {post && (
+              <>
+                <PostDisplay
+                  postId={postId}
+                  username={post.username ?? post.postUser}
+                  date={post.createdAt ?? post.date}
+                  caption={post.caption}
+                  likes={post.likes}
+                />
+              
+              </>
+            )}
           </section>
 
-          {showEditPost && (
-            <section className="edit-post-section">
-              <EditPost postId={postId} onSave={handleSaveEdit} />
-            </section>
-          )}
+         
 
           <section className="comments-section">
-            <Comments postId={postId} />
+            <Comments postId={postId} comments={post?.comments ?? []} onPostUpdated={setPost} />
           </section>
         </div>
       </div>

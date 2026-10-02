@@ -34,7 +34,7 @@ app.get("/api/posts", async (req, res) => {
 
 });
 
-app.get("/api/posts:id", async (req, res) => {
+app.get("/api/posts/:id", async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: "Invalid user ID" });
@@ -46,7 +46,27 @@ app.get("/api/posts:id", async (req, res) => {
 
     const post = await collection.findOne(query, { projection: { password: 0 } });
 
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
     res.status(200).json(post);
+  } catch (error) {
+    // Handle database or server errors
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.get("/api/users/:user/posts", async (req, res) => {
+  try {
+    const db = getDB();
+
+    const collection = db.collection("posts");
+    const query = { postUser: req.params.user };
+
+    const posts = await collection.find(query).toArray();
+
+    return res.status(200).json(posts);
   } catch (error) {
     // Handle database or server errors
     res.status(500).json({ message: "Server error", error: error.message });
@@ -63,6 +83,7 @@ app.post("/api/posts", async (req, res) => {
       ...req.body,
       likes: 0,
       comments: [],
+      reports: [],
     };
 
     const { postUser, caption, hastags, image } = newPost;
@@ -113,8 +134,38 @@ app.post("/api/posts/:id/comments", async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    const post = await collection.findOne(query);
+    const post = await collection.findOne(query, { projection: { password: 0 } });
     return res.status(200).json(post);
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.post("/api/posts/:id/reports", async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const { reason, userId } = req.body ?? {};
+    if (typeof reason !== "string" || reason.trim().length === 0) {
+      return res.status(400).json({ message: "A report reason is required" });
+    }
+
+    const collection = getDB().collection("posts");
+    const query = { _id: new ObjectId(req.params.id) };
+    const report = {
+      reason: reason.trim(),
+      ...(typeof userId === "string" && userId.trim() ? { userId: userId.trim() } : {}),
+      createdAt: new Date(),
+    };
+    const result = await collection.updateOne(query, { $push: { reports: report } });
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    return res.status(201).json({ message: "Post reported successfully" });
   } catch (error) {
     return res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -259,7 +310,7 @@ app.post("/api/login", async (req, res) => {
       return;
     }
     if (result.password == password) {
-      res.status(200).json("success");
+      res.status(200).json({ userId: result._id.toString(), user : result.username });
       return;
       
     } else {
@@ -408,6 +459,146 @@ app.patch("/api/albums/:id", async (req, res) => {
     return res
       .status(500)
       .json({ message: "Server error", error: error.message });
+  }
+});
+
+app.post("/api/users/:id/requests", async (req, res) => {
+  try {
+    const recipientId = req.params.id;
+    const requesterId = req.body?.requesterId;
+    if (!ObjectId.isValid(recipientId) || !ObjectId.isValid(requesterId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    if (recipientId === requesterId) {
+      return res.status(400).json({ message: "You cannot send a friend request to yourself" });
+    }
+
+    const collection = getDB().collection("users");
+    const recipientObjectId = new ObjectId(recipientId);
+    const requesterObjectId = new ObjectId(requesterId);
+    const [recipient, requester] = await Promise.all([
+      collection.findOne({ _id: recipientObjectId }),
+      collection.findOne({ _id: requesterObjectId }),
+    ]);
+    if (!recipient || !requester) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if ((recipient.friends ?? []).some((id) => id.toString() === requesterId)) {
+      return res.status(409).json({ message: "Users are already friends" });
+    }
+
+    await collection.updateOne(
+      { _id: recipientObjectId },
+      { $addToSet: { requests: requesterObjectId } },
+    );
+    return res.status(201).json({ message: "Friend request sent" });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.get("/api/users/:id/requests", async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    const collection = getDB().collection("users");
+    const user = await collection.findOne(
+      { _id: new ObjectId(req.params.id) },
+      { projection: { requests: 1 } },
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const requestIds = (user.requests ?? []).map((id) =>
+      ObjectId.isValid(id) ? new ObjectId(id) : null,
+    ).filter(Boolean);
+    const requests = requestIds.length
+      ? await collection.find({ _id: { $in: requestIds } }, { projection: { password: 0 } }).toArray()
+      : [];
+    return res.status(200).json(requests);
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.post("/api/users/:id/requests/:requesterId/accept", async (req, res) => {
+  try {
+    const { id, requesterId } = req.params;
+    if (!ObjectId.isValid(id) || !ObjectId.isValid(requesterId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    if (id === requesterId) {
+      return res.status(400).json({ message: "Invalid friend request" });
+    }
+
+    const collection = getDB().collection("users");
+    const userId = new ObjectId(id);
+    const senderId = new ObjectId(requesterId);
+    const [user, sender] = await Promise.all([
+      collection.findOne({ _id: userId }),
+      collection.findOne({ _id: senderId }),
+    ]);
+    if (!user || !sender) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (!(user.requests ?? []).some((requestId) => requestId.toString() === requesterId)) {
+      return res.status(404).json({ message: "Friend request not found" });
+    }
+
+    await collection.updateOne(
+      { _id: userId },
+      { $pull: { requests: senderId }, $addToSet: { friends: senderId } },
+    );
+    await collection.updateOne(
+      { _id: senderId },
+      { $addToSet: { friends: userId } },
+    );
+    return res.status(200).json({ message: "Friend request accepted" });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.delete("/api/users/:id/friends/:friendId", async (req, res) => {
+  try {
+    const { id, friendId } = req.params;
+    if (!ObjectId.isValid(id) || !ObjectId.isValid(friendId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    const collection = getDB().collection("users");
+    const userId = new ObjectId(id);
+    const otherId = new ObjectId(friendId);
+    const [user, friend] = await Promise.all([
+      collection.findOne({ _id: userId }),
+      collection.findOne({ _id: otherId }),
+    ]);
+    if (!user || !friend) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await Promise.all([
+      collection.updateOne({ _id: userId }, { $pull: { friends: otherId } }),
+      collection.updateOne({ _id: otherId }, { $pull: { friends: userId } }),
+    ]);
+    return res.status(200).json({ message: "Friend removed" });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.get("/api/content", async (req, res) => {
+  try {
+    const db = getDB();
+    const [albums, posts] = await Promise.all([
+      db.collection("albums").find().toArray(),
+      db.collection("posts").find().toArray(),
+    ]);
+
+    return res.status(200).json({ albums, posts });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

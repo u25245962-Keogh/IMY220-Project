@@ -23,6 +23,7 @@ function Login() {
   }
 
   const navigate = useNavigate();
+  
     const handleSubmit = async (e) => {
       e.preventDefault();
 
@@ -49,6 +50,8 @@ function Login() {
         const data = await response.json();
         if (response.ok) {
           console.log("Login successful:", data);
+          document.cookie = `userId=${encodeURIComponent(data.userId)}; Max-Age=3600; Path=/; SameSite=Lax`;
+          document.cookie = `postUser=${encodeURIComponent(data.user)}; Max-Age=3600; Path=/; SameSite=Lax`;
           setError("Login successful");
           navigate("/home")
           

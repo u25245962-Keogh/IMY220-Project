@@ -1,36 +1,52 @@
 import Navbar from "../components/Navbar";
-import Post from "./Post";
 import { Link } from "react-router-dom";
-import ProfilePreview from "../components/ProfilePreview";
 import PostComponent from "../components/PostComponent";
+import { useEffect, useState } from "react";
 
-const posts = [
-  {
-    id: 1,
-    username: "@person1",
-    caption: "building a rocket",
-  },
-  {
-    id: 2,
-    username: "@person2",
-    caption: "made a ring",
-  },
-  {
-    id: 3,
-    username: "@person3",
-    caption: "Sunset over campus.",
-  },
-];
 function Posts() {
+
+  const [posts, setPosts] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/posts`, {
+          method: "GET",
+        });
+        const posts = await response.json();
+
+        if (!response.ok) {
+          throw new Error(posts.message || "Could not fetch posts");
+        }
+
+        setPosts(Array.isArray(posts) ? posts : []);
+      } catch (error) {
+        setError(error.message || "Failed to connect to the server.");
+      }
+    };
+    
+    fetchContent();
+  },[])
+  console.log(posts);
+
+
+
   return (
     <>
       <Navbar name="Posts"></Navbar>
 
       <div className="postBox">
+        {error && <p role="alert">{error}</p>}
         {posts.map((post) => (
-          <div key={post.id}>
-            <PostComponent username={post.username} />
-            <Link to={`/posts/${post.id}`}>
+          <div key={post._id}>
+            <PostComponent
+              username={post.username ?? post.postUser}
+              image={post.image}
+              caption={post.caption}
+              postId={post._id}
+            />
+            <Link to={`/posts/${post._id}`} state={{ post }}>
              more
             </Link>
           </div>

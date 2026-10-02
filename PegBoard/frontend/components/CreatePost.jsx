@@ -5,6 +5,7 @@ function CreatePost({ onSubmit }) {
   const [formData, setFormData] = useState({
     caption: "",
     image: "",
+    Hashtags: "",
   });
 
   const handleChange = (e) => {
@@ -29,16 +30,19 @@ function CreatePost({ onSubmit }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (onSubmit) {
-      onSubmit(formData);
+    try {
+      await onSubmit(formData);
+
+      setFormData({
+        caption: "",
+        image: "",
+        Hashtags: "",
+      });
+    } catch (error) {
+      console.error("Error creating post:", error);
     }
-    // Reset form
-    setFormData({
-      caption: "",
-      image: "",
-    });
   };
 
   return (
@@ -59,6 +63,18 @@ function CreatePost({ onSubmit }) {
               <img src={formData.image} alt="Preview" />
             </div>
           )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="hashtags">Hashtags</label>
+          <textarea
+            id="Hashtags"
+            name="Hashtags"
+            value={formData.Hashtags}
+            onChange={handleChange}
+            placeholder="#..."
+            rows="4"
+            required
+          />
         </div>
         <div className="form-group">
           <label htmlFor="caption">Caption</label>

@@ -13,6 +13,7 @@ import Signup from "./pages/Signup";
 
 
 
+
 function App() {
   
 
@@ -23,11 +24,13 @@ function App() {
           <Route path="/" element={<Splash />} />
           <Route path="/home" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:id" element={<Profile />} />
           <Route path="/posts" element={<Posts />} />
           <Route path="/posts/:id" element={<Post />} />
           <Route path="/splash" element={<Splash />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+       
         </Routes>
       </BrowserRouter>
     </div>

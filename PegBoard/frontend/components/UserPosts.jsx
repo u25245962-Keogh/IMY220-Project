@@ -1,41 +1,83 @@
 import PostComponent from "./PostComponent";
 import "../styles/Posts.css";
+import { useEffect, useState } from "react";
+import EditPost from "./EditPost";
+import DeletePost from "./DeletePost";
 
-function UserPosts({ posts = [] }) {
-  
-  const samplePosts = [
-    {
-      id: 1,
-      username: "You",
-      date: "2024-01-15",
-      image:
-        "https://static.vecteezy.com/system/resources/thumbnails/008/695/917/small/no-image-available-icon-simple-two-colors-template-for-no-image-or-picture-coming-soon-and-placeholder-illustration-isolated-on-white-background-vector.jpg",
-      caption: "My first post!",
-    },
-    {
-      id: 2,
-      username: "You",
-      date: "2024-01-12",
-      image:
-        "https://static.vecteezy.com/system/resources/thumbnails/008/695/917/small/no-image-available-icon-simple-two-colors-template-for-no-image-or-picture-coming-soon-and-placeholder-illustration-isolated-on-white-background-vector.jpg",
-      caption: "Another beautiful moment",
-    },
-  ];
+function UserPosts({ refreshKey, postUser, waitingForProfile, profileError }) {
+  const [userPosts, setUserPosts] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const displayPosts = posts.length > 0 ? posts : samplePosts;
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setError(null);
+      setLoading(true);
+
+      if (waitingForProfile) {
+        return;
+      }
+
+      try {
+        if (profileError) {
+          throw new Error(profileError);
+        }
+
+        let targetPostUser = postUser;
+        if (!targetPostUser) {
+          const userCookie = document.cookie
+            .split("; ")
+            .find((cookie) => cookie.startsWith("postUser="));
+          targetPostUser = userCookie
+            ? decodeURIComponent(userCookie.slice("postUser=".length))
+            : "";
+        }
+
+        if (!targetPostUser) {
+          throw new Error("Log in to see your posts.");
+        }
+
+        const response = await fetch(
+          `http://localhost:3000/api/users/${encodeURIComponent(targetPostUser)}/posts`,
+        );
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || "Could not fetch friends");
+        }
+
+        setUserPosts(Array.isArray(result) ? result : []);
+      } catch (error) {
+        setError(error.message || "Failed to connect to the server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, [postUser, waitingForProfile, profileError, refreshKey]);
+
+  const handleDelete = (deletedPostId) => {
+    setUserPosts((posts) => posts.filter((post) => post._id !== deletedPostId));
+  };
 
   return (
     <div className="user-posts">
-      <h3>My Posts</h3>
+      <h3>{postUser ? "Posts" : "My Posts"}</h3>
       <div className="posts-list">
-        {displayPosts.length > 0 ? (
-          displayPosts.map((post) => (
+        {error ? (
+          <p role="alert">{error}</p>
+        ) : loading ? (
+          <p>Loading posts...</p>
+        ) : userPosts.length > 0 ? (
+          userPosts.map((post) => (
             <PostComponent
-              key={post.id}
-              username={post.username}
-              date={post.date}
+              key={post._id}
+              username={post.postUser}
+              // date={post.date}
               image={post.image}
               caption={post.caption}
+              edit={<EditPost />}
+              delete={<DeletePost postId={post._id} onDelete={handleDelete} />}
             />
           ))
         ) : (

@@ -17,18 +17,76 @@ function EditProfile({ onSave, initialData = {} }) {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (onSave) {
-      onSave(formData);
+  const handleSubmit = async (e) => {
+    //e.preventDefault();
+
+    const userCookie = document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith("userId="));
+    const userId = userCookie?.slice("userId=".length);
+
+    if (name === "" && surname === "" && email === "" && bio === "" && username ==="") {
+      setError("Fill in at least one field!");
+      return;
     }
-    // Reset or redirect after save
+
+   
+
+    //setError("Login details are valid.");
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/users/${encodeURIComponent(decodeURIComponent(userId))}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(
+            Object.fromEntries(
+              Object.entries(formData).filter(([, value]) => value.length > 0),
+            ),
+          ),
+        },
+      );
+      const data = await response.json();
+      if (response.ok) {
+        
+      } else {
+        setError(data.message || "invalid changes");
+      }
+    } catch (error) {
+      console.error(error);
+      setError("failed to connect to the server.");
+    }
   };
 
   return (
     <div className="edit-profile">
       <h3>Edit Profile</h3>
       <form onSubmit={handleSubmit} className="profile-form">
+        <div className="form-group">
+          <label htmlFor="name">name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter your name"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="surname">surname</label>
+          <input
+            type="text"
+            id="surname"
+            name="surname"
+            value={formData.surname}
+            onChange={handleChange}
+            placeholder="Enter your surname"
+          />
+        </div>
         <div className="form-group">
           <label htmlFor="username">Username</label>
           <input
@@ -62,17 +120,7 @@ function EditProfile({ onSave, initialData = {} }) {
             placeholder="Enter your email"
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="website">Website</label>
-          <input
-            type="url"
-            id="website"
-            name="website"
-            value={formData.website}
-            onChange={handleChange}
-            placeholder="Enter your website URL"
-          />
-        </div>
+
         <button type="submit" className="save-button">
           Save Changes
         </button>
