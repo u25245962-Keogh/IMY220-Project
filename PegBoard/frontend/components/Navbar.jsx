@@ -6,29 +6,23 @@ import nails from "../assests/Nails.png";
 
 function Navbar(props) {
   return (
-    <>
-      <h1 className="pageName">{props.name}</h1>
+    <header className="site-navbar">
       <div className="header">
-        <h1>PegBoard</h1>
-        <div className="Navigation">
+        <h1 className="pageName">{props.name}</h1>
+        <nav className="Navigation" aria-label="Main navigation">
           <div className="navImage">
-            <img
-              src={nails}
-              alt="3 nails"
-              className="nails"
-              
-            />
+            <img src={nails} alt="" className="nails" />
           </div>
           <div className="navList">
             <ul>
-              <Link to="/home">Home </Link>
-              <Link to="/posts">Posts </Link>
-              <Link to="/profile">Profile </Link>
+              <li><Link to="/home" className="navLink">Home</Link></li>
+              <li><Link to="/posts" className="navLink">Posts</Link></li>
+              <li><Link to="/profile" className="navLink">Profile</Link></li>
             </ul>
           </div>
+        </nav>
         </div>
-      </div>
-    </>
+    </header>
   );
 }
 

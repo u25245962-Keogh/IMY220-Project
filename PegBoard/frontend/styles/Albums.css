@@ -1,0 +1,192 @@
+.profile-albums {
+  margin: 2rem 0;
+  
+}
+
+.album-form {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 36rem;
+  margin: 1rem 0 2rem;
+  padding: 1rem;
+  border: 1px solid #d5d5d5;
+  border-radius: 0.5rem;
+}
+
+.album-form input:not([type="checkbox"]),
+.album-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.album-post-selection {
+  display: grid;
+  gap: 0.5rem;
+  border: 1px solid #d5d5d5;
+  border-radius: 0.25rem;
+
+}
+
+.album-post-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-album-item {
+  margin-bottom: 1.5rem;
+}
+
+.album-card-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: min(100%, 24rem);
+}
+
+.edit-album-form {
+  width: 100%;
+}
+
+.edit-album-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.delete-album-btn {
+  margin: 0.5rem 0;
+}
+
+.album-page {
+  box-sizing: border-box;
+  min-height: calc(100vh - 2rem);
+  max-width: 100rem;
+  margin: 0 auto;
+  padding: 2rem 15rem 3rem 2rem;
+  color: #082653;
+  background-color: #fafafa;
+  background-image: radial-gradient(circle, #aaa 5px, transparent 6px);
+  background-size: 67px 67px;
+  font-family: "Love Ya Like A Sister", cursive;
+}
+
+.album-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  
+}
+
+.album-detail-header {
+  text-align: center;
+  grid-area: title;
+ 
+}
+
+.album-detail-green-note {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 390px;
+  padding: 5.5rem 2rem 2rem;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 30% ;
+  color: white;
+  filter: drop-shadow(0 5px 5px rgb(0 0 0 / 25%));
+ 
+}
+
+.album-detail-green-note {
+ 
+  background-image: url("../assests/greenNote.png");
+}
+
+.album-detail-green-note h2,
+.album-detail-posts > h3 {
+  margin: 0 0 1rem;
+  color: white;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  overflow-wrap: anywhere;
+ 
+}
+
+.album-detail-green-note p {
+  margin: 0 0 0.8rem;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
+  
+}
+
+.album-detail-green-note a {
+  color: inherit;
+  
+}
+
+.album-detail-green-note .album-owner {
+  margin-top: 1rem;
+
+}
+
+.album-detail-hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  text-align: center;
+  justify-content: center;
+  
+}
+
+
+
+.album-detail-green-note .album-detail-hashtags {
+  margin-top: 5rem;
+ 
+}
+
+.album-detail-green-note .album-detail-hashtags span {
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.4rem;
+ 
+}
+
+.album-post-count {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.album-detail-posts {
+  padding: 1.5rem;
+  background: rgb(255 255 255 / 85%);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 15%);
+}
+
+.album-detail-posts > h3 {
+  margin: 0 0 1.5rem;
+  font-size: 1.6rem;
+}
+
+.album-detail-post-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  justify-items: center;
+  gap: 1.5rem;
+}
+
+@media (max-width: 850px) {
+  .album-page {
+    padding: 7rem 1rem 2rem;
+  }
+}
+
+@media (max-width: 650px) {
+  .album-detail-green-note {
+    min-height: 320px;
+    padding: 4.5rem 1.5rem 1.5rem;
+  }
+
+  .album-detail-posts {
+    padding: 1rem;
+  }
+}

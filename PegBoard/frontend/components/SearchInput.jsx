@@ -24,14 +24,12 @@ function SearchInput({ onSearch }) {
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Search posts, users, or tags..."
+          placeholder="Search..."
           value={searchTerm}
           onChange={handleChange}
           className="search-input"
         />
-        <button type="submit" className="search-button">
-          Search
-        </button>
+        
       </form>
     </div>
   );

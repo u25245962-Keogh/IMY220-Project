@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import "../styles/Signup.css";
 
-import logo from "../assests/logo.png";
 import sculpture from "../assests/scultpure.png";
 import printing3D from "../assests/3Dprinting.png";
 import candle from "../assests/candle.png";
@@ -129,9 +128,6 @@ function SignUp() {
           already have an account? <Link to="/login">Login</Link>
         </p>
       </div>
-         <Link to={"/"} id="signUpLogo">
-                <img src={logo} id="signUpLogo" />
-              </Link>
       <img src={sculpture} id="SUsculpture" className="splashImages" />
       <img src={printing3D} id="SUprinting" className="splashImages" />
       <img src={candle} id="SUcandle" className="splashImages" />

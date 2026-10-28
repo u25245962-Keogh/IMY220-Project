@@ -1,12 +1,14 @@
 import { useState } from "react";
 import "../styles/Posts.css";
 
-function CreatePost({ onSubmit }) {
+function CreatePost({ onSubmit, userId }) {
   const [formData, setFormData] = useState({
     caption: "",
     image: "",
     Hashtags: "",
   });
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,23 +34,28 @@ function CreatePost({ onSubmit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
     try {
-      await onSubmit(formData);
+      await onSubmit({ ...formData, userId });
 
       setFormData({
         caption: "",
         image: "",
         Hashtags: "",
       });
-    } catch (error) {
-      console.error("Error creating post:", error);
+    } catch (submitError) {
+      setError(submitError.message || "Could not create post.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="create-post">
+    <div className="create-post profile-creation-form">
       <h3>Create New Post</h3>
       <form onSubmit={handleSubmit} className="post-form">
+        <input type="hidden" name="userId" value={userId ?? ""} />
         <div className="form-group">
           <label htmlFor="image">Upload Image</label>
           <input
@@ -56,10 +63,11 @@ function CreatePost({ onSubmit }) {
             id="image"
             accept="image/*"
             onChange={handleImageChange}
-            className="image-input"
+            className="image-input profile-file-input"
           />
+          <p className="form-help">Choose an image to share with your post.</p>
           {formData.image && (
-            <div className="image-preview">
+            <div className="image-preview profile-image-preview">
               <img src={formData.image} alt="Preview" />
             </div>
           )}
@@ -67,14 +75,15 @@ function CreatePost({ onSubmit }) {
         <div className="form-group">
           <label htmlFor="hashtags">Hashtags</label>
           <textarea
-            id="Hashtags"
+            id="hashtags"
             name="Hashtags"
             value={formData.Hashtags}
             onChange={handleChange}
-            placeholder="#..."
-            rows="4"
+            placeholder="#art, #paintings"
+            rows="2"
             required
           />
+          <p className="form-help">Separate hashtags with commas or spaces.</p>
         </div>
         <div className="form-group">
           <label htmlFor="caption">Caption</label>
@@ -84,12 +93,13 @@ function CreatePost({ onSubmit }) {
             value={formData.caption}
             onChange={handleChange}
             placeholder="Write a caption for your post..."
-            rows="4"
+            rows="3"
             required
           />
         </div>
-        <button type="submit" className="submit-button">
-          Post
+        {error && <p className="form-error" role="alert">{error}</p>}
+        <button type="submit" className="submit-button profile-submit-button" disabled={isSubmitting}>
+          {isSubmitting ? "Posting..." : "Share Post"}
         </button>
       </form>
     </div>

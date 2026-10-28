@@ -7,13 +7,7 @@ function EditPost({ postId, onSave, initialCaption = "" }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (onSave) {
-      onSave({
-        postId,
-        caption,
-      });
-    }
-    setIsEditing(false);
+    
   };
 
   return (

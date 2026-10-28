@@ -1,16 +1,14 @@
 import { useState } from "react";
 import "../styles/Posts.css";
+import { useAuth } from "../context/AuthContext";
 
 function Comments({ postId, comments = [], onPostUpdated }) {
+
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const userCookie = document.cookie
-    .split("; ")
-    .find((cookie) => cookie.startsWith("postUser="));
-  const currentUser = userCookie
-    ? decodeURIComponent(userCookie.slice("postUser=".length))
-    : "";
+  const { user } = useAuth();
+  const currentUser = user?.username ?? "";
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -46,9 +44,9 @@ function Comments({ postId, comments = [], onPostUpdated }) {
   };
 
   return (
-    <div className="comments-section">
-      <h3>Comments</h3>
-      <div className="comments-list">
+    <div className="flex w-full flex-col gap-3">
+      <h3 className="m-0 text-xl">Comments</h3>
+      <div className="flex max-h-72 flex-col gap-3 overflow-y-auto rounded-xl bg-white/30 p-4">
         {comments.map((comment, index) => {
           const text = typeof comment === "string" ? comment : comment?.comment ?? comment?.text ?? "";
           const username = typeof comment === "object" && comment !== null
@@ -56,25 +54,25 @@ function Comments({ postId, comments = [], onPostUpdated }) {
             : "";
 
           return (
-            <div key={comment?._id ?? comment?.id ?? `${index}-${text}`} className="comment">
+            <div key={comment?._id ?? comment?.id ?? `${index}-${text}`} className="break-words">
               {username && <strong>{username}</strong>}
-              <p className="comment-text">{text}</p>
+              <p className="m-0">{text}</p>
             </div>
           );
         })}
       </div>
-      <form onSubmit={handleAddComment} className="add-comment-form">
+      <form onSubmit={handleAddComment} className="flex w-full gap-2">
         <input
           id="post-comment-input"
           type="text"
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
-          className="comment-input"
+          className="min-w-0 flex-1 rounded-lg border border-green-900/30 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500"
           required
           disabled={isSubmitting}
         />
-        <button type="submit" className="comment-submit" disabled={isSubmitting || !newComment.trim()}>
+        <button type="submit" className="rounded-lg bg-green-900 px-4 py-2 text-white hover:bg-green-950 disabled:opacity-60" disabled={isSubmitting || !newComment.trim()}>
           Post
         </button>
       </form>

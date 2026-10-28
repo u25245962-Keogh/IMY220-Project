@@ -1,63 +1,75 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Love+Ya+Like+A+Sister&family=Rubik+Spray+Paint&display=swap');
-.rubik-spray-paint-regular {
-    font-family: "Rubik Spray Paint", system-ui;
-    font-weight: 400;
-    font-style: normal;
-  }
-  
-
-div.Navigation{
-    background-color: rgb(255, 153, 0);
-   width: 100%;
-    
-    display: flex;
-    flex-direction: column;
-    font-family: "Love Ya Like A Sister", cursive;
-    
-  color: black;
-  filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.3));
- 
+.site-navbar .header {
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  right: 1rem;
+  width: 198px;
+  text-align: center;
+  filter: drop-shadow(4px 4px 8px rgb(0 0 0 / 30%));
 }
-.pageName{
+
+.site-navbar .pageName {
   z-index: 1;
- 
+  margin: 0;
+  padding: 0.75rem 0.5rem;
+  background: #ec6e2d;
+  color: #082653;
+  font-family: "Love Ya Like A Sister", cursive;
+  font-size: 2rem;
 }
 
-.header{
+.site-navbar .Navigation {
+  display: flex;
+  min-height: 12rem;
+  flex-direction: column;
+  justify-content: center;
+  background: #ec6e2d;
+  color: white;
+  font-family: "Love Ya Like A Sister", cursive;
+}
 
+.site-navbar .navImage {
+  display: none;
+}
+
+.site-navbar .navList {
+  text-align: center;
+}
+
+.site-navbar .navList ul {
   display: flex;
   flex-direction: column;
-  text-align: center;
-  justify-self: right;
-  top: 0px;
-  z-index: 2;
-  position: absolute;
-}
-h1{
-    font-family: "Rubik Spray Paint", system-ui;
-    font-weight: 400;
-  font-style: normal;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.5rem 1rem 1.25rem;
+  list-style: none;
 }
 
-
-  
-div.navList{
-    text-align: center;
+.site-navbar .navLink {
+  color: white;
+  font-family: "Love Ya Like A Sister", cursive;
+  font-size: 1.5rem;
 }
 
-ul{
-    display: flex;
-    flex-direction: column;
-   
-   
-}
-a{
-  
-    font-size: 35px;
-    text-decoration: none;
-    color: black;
-}
-.navImage > img{
- height: 150px;
+.site-navbar .navLink:hover {
+  color: #082653;
 }
 
+@media (max-width: 850px) {
+  .site-navbar .header {
+    right: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  .site-navbar .Navigation {
+    min-height: auto;
+  }
+
+  .site-navbar .navList ul {
+    flex-direction: row;
+    justify-content: center;
+    padding: 0.5rem;
+  }
+}

@@ -5,8 +5,12 @@ function ImageComponent({
   alt = "Post image",
 }) {
   return (
-    <div className="image-component">
-      <img src={src} alt={alt} className="post-image" />
+    <div className="flex w-full justify-center">
+      <img
+        src={src}
+        alt={alt}
+        className="max-h-[32rem] max-w-full rounded-xl object-contain"
+      />
     </div>
   );
 }

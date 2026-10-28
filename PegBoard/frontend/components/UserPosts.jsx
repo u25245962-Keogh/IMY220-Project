@@ -3,11 +3,16 @@ import "../styles/Posts.css";
 import { useEffect, useState } from "react";
 import EditPost from "./EditPost";
 import DeletePost from "./DeletePost";
+import { useAuth } from "../context/AuthContext";
+import sortByDateDescending from "../utils/sortByDate";
 
 function UserPosts({ refreshKey, postUser, waitingForProfile, profileError }) {
   const [userPosts, setUserPosts] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const targetPostUser = postUser || user?.username || "";
+  const sortedUserPosts = sortByDateDescending(userPosts);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -21,16 +26,6 @@ function UserPosts({ refreshKey, postUser, waitingForProfile, profileError }) {
       try {
         if (profileError) {
           throw new Error(profileError);
-        }
-
-        let targetPostUser = postUser;
-        if (!targetPostUser) {
-          const userCookie = document.cookie
-            .split("; ")
-            .find((cookie) => cookie.startsWith("postUser="));
-          targetPostUser = userCookie
-            ? decodeURIComponent(userCookie.slice("postUser=".length))
-            : "";
         }
 
         if (!targetPostUser) {
@@ -54,7 +49,7 @@ function UserPosts({ refreshKey, postUser, waitingForProfile, profileError }) {
       }
     };
     fetchPosts();
-  }, [postUser, waitingForProfile, profileError, refreshKey]);
+  }, [targetPostUser, waitingForProfile, profileError, refreshKey]);
 
   const handleDelete = (deletedPostId) => {
     setUserPosts((posts) => posts.filter((post) => post._id !== deletedPostId));
@@ -69,15 +64,17 @@ function UserPosts({ refreshKey, postUser, waitingForProfile, profileError }) {
         ) : loading ? (
           <p>Loading posts...</p>
         ) : userPosts.length > 0 ? (
-          userPosts.map((post) => (
+          sortedUserPosts.map((post) => (
             <PostComponent
               key={post._id}
+              id={post._id}
+              userId={post.userId}
               username={post.postUser}
-              // date={post.date}
               image={post.image}
               caption={post.caption}
-              edit={<EditPost />}
-              delete={<DeletePost postId={post._id} onDelete={handleDelete} />}
+              hashtags={post.hastags ?? post.hashtags}
+              edit={!postUser && <EditPost />}
+              delete={!postUser && <DeletePost postId={post._id} onDelete={handleDelete} />}
             />
           ))
         ) : (

@@ -1,56 +1,13 @@
 import "../styles/Posts.css";
-import { useState } from "react";
 
-function PostDisplay({ postId, username, caption, date, likes = 0 }) {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(likes);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleLike = async () => {
-    setIsUpdating(true);
-    setError("");
-
-    try {
-      const response = await fetch(`http://localhost:3000/api/posts/${postId}/likes`, {
-        method: liked ? "DELETE" : "POST",
-      });
-      const updatedPost = await response.json();
-
-      if (!response.ok) {
-        throw new Error(updatedPost.message || "Could not update like");
-      }
-
-      if (typeof updatedPost.likes !== "number") {
-        throw new Error("The likes API response did not include a like count");
-      }
-      setLikeCount(updatedPost.likes);
-      setLiked(!liked);
-    } catch (requestError) {
-      setError(requestError.message || "Failed to update like.");
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
+function PostDisplay({ username, caption, date }) {
   return (
-    <div className="post-display">
-      <div className="post-header">
-        <h2>{username}</h2>
-        {date && <time dateTime={date}>{new Date(date).toLocaleString()}</time>}
+    <div className="flex w-full flex-col gap-3 text-center">
+      <div className="flex flex-col items-center">
+        <h2 className="m-0 break-words text-2xl">{username}</h2>
+        {date && <time className="text-sm" dateTime={date}>{new Date(date).toLocaleString()}</time>}
       </div>
-      <div className="post-content">
-        <p className="post-caption">{caption}</p>
-        <div className="post-actions">
-          <button className="like-button" type="button" onClick={handleLike} disabled={isUpdating} aria-pressed={liked}>
-            {liked ? "Unlike" : "Like"} ({likeCount})
-          </button>
-          <button className="comment-button" type="button" onClick={() => document.getElementById("post-comment-input")?.focus()}>
-            Comment
-          </button>
-        </div>
-        {error && <p role="alert">{error}</p>}
-      </div>
+      <p className="m-0 max-w-full break-words text-lg">{caption}</p>
     </div>
   );
 }

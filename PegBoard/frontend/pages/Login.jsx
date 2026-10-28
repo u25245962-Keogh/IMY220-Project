@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "../styles/login.css";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import loginTools from "../assests/logintools.png";
 import woodgrain from "../assests/grain.jpeg.jpg"
-import logo from "../assests/logoWhite.png";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { setUser } = useAuth();
   
   const handleEmail =  (e) => {
     e.preventDefault();
@@ -23,7 +24,7 @@ function Login() {
   }
 
   const navigate = useNavigate();
-  
+
     const handleSubmit = async (e) => {
       e.preventDefault();
 
@@ -50,8 +51,7 @@ function Login() {
         const data = await response.json();
         if (response.ok) {
           console.log("Login successful:", data);
-          document.cookie = `userId=${encodeURIComponent(data.userId)}; Max-Age=3600; Path=/; SameSite=Lax`;
-          document.cookie = `postUser=${encodeURIComponent(data.user)}; Max-Age=3600; Path=/; SameSite=Lax`;
+          setUser({ id: data.userId, username: data.user });
           setError("Login successful");
           navigate("/home")
           
@@ -68,10 +68,6 @@ function Login() {
   return (
     <div id="loginSplit">
       <div className="loginForm">
-        <Link to={"/"} id="Logo">
-          <img src={logo} id="Logo" />
-        </Link>
-
         <img src={woodgrain} id="grain"></img>
         <div id="welcomeBack">
           <h1>Welcome back!</h1>

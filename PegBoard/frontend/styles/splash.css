@@ -8,14 +8,13 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-   
 }
 .logoSplash > p{
     font-family: "Love Ya Like A Sister", cursive;
     font-size: 1.9em;
     margin: 15px;
    background-color: #fafafa;
-    
+   transform: translate(0px,100px);
 
 }
 
@@ -23,7 +22,9 @@
 .L-button{
     background-color: #e55812;
     width: 15em;
-    border-radius: 10px;
+    border-radius: 0.6rem;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.295), 0 6px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
    
 }
 .L-button:hover{
@@ -32,15 +33,31 @@
    
 }
 .L-button > a{
+    display: block;
+    padding: 0.7rem 1.2rem;
     font-family: "Love Ya Like A Sister", cursive;
     color: white;
+    font-size: 1.1em;
+    text-decoration: none;
+}
+
+.L-button:active{
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.295), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.L-button:focus-within{
+    outline: 3px solid white;
+    outline-offset: 3px;
 }
 
 .S-button{
     background-color: #95c623;
     
     width: 15em;
-    border-radius: 10px;
+    border-radius: 0.6rem;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.295), 0 6px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
 }
 
 .S-button:hover{
@@ -48,12 +65,26 @@
    
 }
 .S-button > a{
-    
+    display: block;
+    padding: 0.7rem 1.2rem;
     font-family: "Love Ya Like A Sister", cursive;
     color: white;
+    font-size: 1.1em;
+    text-decoration: none;
     
 }
+
+.S-button:active{
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.295), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.S-button:focus-within{
+    outline: 3px solid white;
+    outline-offset: 3px;
+}
 .SL-buttons{
+    transform: translate(0px,100px);
     text-align: center;
     display: flex;
     justify-self: center;

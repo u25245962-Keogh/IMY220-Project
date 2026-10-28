@@ -1,6 +1,18 @@
+@import "tailwindcss";
+
+a {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+}
+
+a:hover {
+    text-decoration-thickness: 2px;
+}
+
 body{
   
-    background-image: url(../PegBoard/frontend/assests/background.png);
+    background-image: url(/frontend/assests/background.png);
 
     
 

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Love+Ya+Like+A+Sister&family=Rubik+Spray+Paint&display=swap');
+
 #signupFormDiv{
     background-color: #a3d332;
     display: flex;
@@ -23,6 +25,8 @@
     text-align: center;
     font-size: 5em;
     margin-bottom: 0%;
+    font-family: "Rubik Spray Paint", system-ui;
+    font-weight: 400;
 
 }
 #SUh3{
@@ -32,18 +36,12 @@
     color: white;
     
     font-family: "Love Ya Like A Sister";
-    padding-left: 10px;
-    width: 50%;
+   
+   
+    margin-bottom: 40px;
+    text-align: center;
+   
 }
-#signUpLogo{
-    position: absolute;
-    z-index: 3;
-    top: 0%;
-    left: 0%;
-    height: 45px;
-    padding: 20px;
-}
-
 .signupInput{
     margin: 15px;
     margin-bottom: 30px;
@@ -51,6 +49,7 @@
     padding: 15px;
     border-radius: 10px;
     border: none;
+  background-color: #eff8dc;
   margin-left: 20px;
   align-self: center;
   margin-top: 0%;
@@ -75,17 +74,18 @@
 }
 
 #signupButton{
-    padding: 10px;
-   
+   padding: 0.7rem 1.2rem;
    margin: 20px;
    background-color:  #e55812;
    width: 15em;
-   border-radius: 10px;
+   border-radius: 0.6rem;
    font-family: "Love Ya Like A Sister", cursive;
    color: white;
-   font-size: 1.5em;
+   font-size: 1.1em;
    border: none;
-   box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.295);
+   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.295), 0 6px 10px rgba(0, 0, 0, 0.2);
+   cursor: pointer;
+   transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
 }
 #signupError{
     font-family: "Love Ya Like A Sister", cursive;
@@ -99,6 +99,17 @@
     background-color:  #ff712a;
    
 }
+
+#signupButton:active{
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.295), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#signupButton:focus-visible{
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+}
+
 #signupButtonDiv{
     text-align: center;
 }

@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import "../styles/profile.css";
+import { useAuth } from "../context/AuthContext";
+import {
+  getCachedProfileImage,
+  resolveProfileImageUrl,
+} from "../utils/profileImage";
 
-function Profile() {
+function Profile({ refreshKey }) {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
+  const { user } = useAuth();
 
   useEffect(() => {
-    const userCookie = document.cookie
-      .split("; ")
-      .find((cookie) => cookie.startsWith("userId="));
-    const userId = userCookie?.slice("userId=".length);
-
-    if (!userId) {
-      setError("Please log in to view your profile.");
+    if (!user?.id) {
       return;
     }
 
@@ -20,9 +20,8 @@ function Profile() {
 
     const fetchProfile = async () => {
       try {
-        const decodedUserId = decodeURIComponent(userId);
         const response = await fetch(
-          `http://localhost:3000/api/users/${encodeURIComponent(decodedUserId)}`
+          `http://localhost:3000/api/users/${encodeURIComponent(user.id)}`
         );
         const data = await response.json();
 
@@ -44,7 +43,11 @@ function Profile() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [user?.id, refreshKey]);
+
+  if (!user?.id) {
+    return <p className="text-sm font-medium text-red-700" role="alert">Please log in to view your profile.</p>;
+  }
 
   if (error) {
     return <p className="text-sm font-medium text-red-700" role="alert">{error}</p>;
@@ -54,36 +57,25 @@ function Profile() {
     return <p className="text-sm text-stone-600">Loading profile...</p>;
   }
 
-  const { username, bio, followers, following } = profile;
+  const { username, name, surname, email, bio } = profile;
+  const cachedImage = getCachedProfileImage(user.id);
+  const profileImage = resolveProfileImageUrl(profile.image || cachedImage);
 
   return (
     <div className="profile-info">
-      <div className="profile-header flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
-        <div className="profile-avatar size-28 shrink-0 overflow-hidden rounded-full border-4 border-orange-100 bg-stone-100 sm:size-32">
+      <div className="profile-avatar profile-note">
+          <span className="profile-pin" aria-hidden="true" />
           <img
-            src="https://static.vecteezy.com/system/resources/thumbnails/008/695/917/small/no-image-available-icon-simple-two-colors-template-for-no-image-or-picture-coming-soon-and-placeholder-illustration-isolated-on-white-background-vector.jpg"
+            src={profileImage}
             alt={username || "User profile"}
-            className="avatar-image size-full object-cover"
+            className="profile-img"
           />
-        </div>
-        <div className="profile-details min-w-0 flex-1">
-          <h2 className="break-words text-2xl font-bold text-stone-900 sm:text-3xl">{username || "Unnamed user"}</h2>
-          {bio && <p className="bio mt-2 max-w-2xl whitespace-pre-wrap text-sm leading-6 text-stone-600">{bio}</p>}
-          <div className="profile-stats mt-5 flex flex-wrap gap-3">
-            {followers != null && (
-              <div className="stat flex min-w-28 flex-col rounded-md bg-stone-100 px-4 py-3">
-                <span className="stat-number text-lg font-bold text-stone-900">{followers}</span>
-                <span className="stat-label text-xs font-medium uppercase text-stone-500">Followers</span>
-              </div>
-            )}
-            {following != null && (
-              <div className="stat flex min-w-28 flex-col rounded-md bg-stone-100 px-4 py-3">
-                <span className="stat-number text-lg font-bold text-stone-900">{following}</span>
-                <span className="stat-label text-xs font-medium uppercase text-stone-500">Following</span>
-              </div>
-            )}
-          </div>
-        </div>
+      </div>
+      <div className="profile-details profile-note">
+        <span className="profile-pin" aria-hidden="true" />
+        <h2>{[name, surname].filter(Boolean).join(" ") || username || "Unnamed user"}</h2>
+        {email && <p>{email}</p>}
+        {bio && <p>{bio}</p>}
       </div>
     </div>
   );

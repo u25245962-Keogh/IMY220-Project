@@ -1,12 +1,13 @@
 import Navbar from "../components/Navbar";
-import { Link } from "react-router-dom";
 import PostComponent from "../components/PostComponent";
 import { useEffect, useState } from "react";
+import sortByDateDescending from "../utils/sortByDate";
 
 function Posts() {
 
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState("");
+  const sortedPosts = sortByDateDescending(posts);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -28,27 +29,23 @@ function Posts() {
     
     fetchContent();
   },[])
-  console.log(posts);
-
-
-
   return (
     <>
       <Navbar name="Posts"></Navbar>
 
-      <div className="postBox">
+      <div className="">
         {error && <p role="alert">{error}</p>}
-        {posts.map((post) => (
-          <div key={post._id}>
+        {sortedPosts.map((post, index) => (
+          <div key={post._id ?? post.id ?? index}>
             <PostComponent
-              username={post.username ?? post.postUser}
+              id={post._id}
+              username={post.postUser ?? post.username}
+              date={post.createdAt ?? post.date}
               image={post.image}
               caption={post.caption}
-              postId={post._id}
+              hashtags={post.hastags ?? post.hashtags}
+              userId={post.userId}
             />
-            <Link to={`/posts/${post._id}`} state={{ post }}>
-             more
-            </Link>
           </div>
         ))}
       </div>

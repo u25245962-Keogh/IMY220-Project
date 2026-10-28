@@ -1,0 +1,403 @@
+.profile-img{
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-page {
+    min-height: calc(100vh - 2rem);
+    padding: 2rem;
+    color: #082653;
+    background-color: #fafafa;
+    background-image: radial-gradient(circle, #aaa 5px, transparent 6px);
+    background-size: 67px 67px;
+}
+
+.profile-content {
+    width: min(100%, 1500px);
+    margin: 0 auto;
+    padding-right: 220px;
+}
+
+.profile-section {
+    margin: 1rem 0 3rem;
+}
+
+.profile-info {
+    display: grid;
+    grid-template-columns: minmax(170px, 240px) minmax(230px, 350px);
+    align-items: center;
+    gap: 2rem;
+}
+
+.profile-note {
+    position: relative;
+    box-sizing: border-box;
+    min-height: 180px;
+    padding: 2rem 1.5rem;
+    background-color: #95c623;
+    background-image: url("../assests/greenNote.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    filter: drop-shadow(0 4px 4px rgb(0 0 0 / 25%));
+}
+
+.profile-avatar {
+    display: grid;
+    aspect-ratio: 1.1;
+    place-items: center;
+    padding: 1.25rem;
+    background: #a9dc41;
+    transform: rotate(-6deg);
+}
+
+.profile-avatar img {
+    width: 75%;
+    height: auto;
+    aspect-ratio: 1;
+    border: 2px solid #082653;
+    background: #17668a;
+}
+
+.profile-edit-preview {
+    width: 120px;
+    height: 120px;
+}
+
+.profile-details {
+    aspect-ratio: 8 / 9;
+    min-height: 0;
+    padding-top: 6rem;
+    background-color: transparent;
+    background-size: contain;
+    transform: translateX(300px) rotate(5deg);
+}
+
+.profile-details h2,
+.profile-details p {
+    margin: 0 0 0.75rem;
+    overflow-wrap: anywhere;
+    color: white;
+    font-family: "Love Ya Like A Sister", cursive;
+}
+
+.profile-details h2 {
+    font-size: 1.5rem;
+}
+
+.profile-pin {
+    display: none;
+}
+
+.edit-profile-btn,
+.create-post-toggle-btn {
+    margin: 1.25rem 0.5rem 0 0;
+    padding: 0.7rem 1.2rem;
+    border: 0;
+    background: #ec6e2d;
+    color: white;
+    box-shadow: 2px 3px 5px #0003;
+    cursor: pointer;
+    font-family: "Love Ya Like A Sister", cursive;
+    font-size: 1.1rem;
+}
+
+.edit-profile-btn:hover,
+.create-post-toggle-btn:hover {
+    background: #d95618;
+}
+
+.edit-profile-btn,
+.create-post-toggle-btn,
+.profile-submit-button,
+.profile-page .album-form button {
+    border-radius: 0.6rem;
+    font-family: "Love Ya Like A Sister", cursive;
+    box-shadow: 0 4px 0 #9e3d12, 0 6px 10px rgb(0 0 0 / 20%);
+    transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.edit-profile-btn:active,
+.create-post-toggle-btn:active,
+.profile-submit-button:active,
+.profile-page .album-form button:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #9e3d12, 0 2px 4px rgb(0 0 0 / 20%);
+}
+
+.edit-profile-btn:focus-visible,
+.create-post-toggle-btn:focus-visible,
+.profile-submit-button:focus-visible,
+.profile-page .album-form button:focus-visible {
+    outline: 3px solid #082653;
+    outline-offset: 3px;
+}
+
+.profile-submit-button:disabled,
+.profile-page .album-form button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+    transform: none;
+    box-shadow: 0 2px 0 #9e3d12;
+}
+
+.profile-creation-form,
+.profile-page .album-form {
+    display: grid;
+    gap: 1.1rem;
+    width: min(100%, 700px);
+    box-sizing: border-box;
+    border-radius: 1rem;
+    color: #082653;
+    font-family: "Inter", sans-serif;
+}
+
+.profile-creation-form .profile-form,
+.profile-creation-form .post-form,
+.profile-page .album-form {
+    display: grid;
+    gap: 1.15rem;
+}
+
+.profile-creation-form h3,
+.profile-page .album-form h3 {
+    margin: 0;
+    color: #082653;
+    font-family: "Love Ya Like A Sister", cursive;
+    font-size: 1.5rem;
+}
+
+.profile-creation-form .form-group,
+.profile-page .album-form > label {
+    display: grid;
+    gap: 0.55rem;
+    color: #082653;
+}
+
+.profile-creation-form .form-group > label,
+.profile-page .album-form > label,
+.profile-page .album-post-selection legend {
+    width: fit-content;
+    color: #082653;
+    font-family: "Love Ya Like A Sister", cursive;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.profile-creation-form input:not([type="hidden"]):not([type="file"]),
+.profile-creation-form textarea,
+.profile-page .album-form input:not([type="checkbox"]),
+.profile-page .album-form textarea {
+    width: 100%;
+    min-height: 2.8rem;
+    box-sizing: border-box;
+    padding: 0.75rem 0.85rem;
+    border: 2px solid #759e1d;
+    border-radius: 0.6rem;
+    background: #fff;
+    color: #17212b;
+    font: 1rem/1.5 "Inter", sans-serif;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.profile-creation-form input:not([type="hidden"]):not([type="file"]):focus,
+.profile-creation-form textarea:focus,
+.profile-page .album-form input:focus,
+.profile-page .album-form textarea:focus {
+    border-color: #082653;
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(8 38 83 / 15%);
+}
+
+.profile-creation-form input::placeholder,
+.profile-creation-form textarea::placeholder,
+.profile-page .album-form input::placeholder {
+    color: #737d68;
+}
+
+.profile-creation-form .form-help {
+    margin: 0;
+    color: #40532c;
+    font-size: 0.85rem;
+    font-weight: 400;
+}
+
+.profile-page .profile-file-input {
+    width: 100%;
+    padding: 0.55rem;
+    border: 2px dashed #759e1d;
+    border-radius: 0.6rem;
+    background: rgb(255 255 255 / 55%);
+    color: #17212b;
+    font: 0.95rem "Inter", sans-serif;
+}
+
+.profile-creation-form .form-group input[type="file"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.65rem;
+    border: 2px dashed #759e1d;
+    border-radius: 0.6rem;
+    background: rgb(255 255 255 / 55%);
+    color: #17212b;
+    font: 0.95rem "Inter", sans-serif;
+}
+
+.profile-image-preview {
+    display: flex;
+    justify-content: center;
+    max-height: 16rem;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: rgb(255 255 255 / 45%);
+}
+
+.profile-image-preview img {
+    max-width: 100%;
+    max-height: 16rem;
+    object-fit: contain;
+}
+
+.profile-submit-button,
+.profile-page .album-form button {
+    justify-self: start;
+    min-height: 2.8rem;
+    padding: 0.65rem 1.4rem;
+    border: 0;
+    background: #ec6e2d;
+    color: white;
+    cursor: pointer;
+    font-size: 1.05rem;
+}
+
+.profile-submit-button:hover:not(:disabled),
+.profile-page .album-form button:hover:not(:disabled) {
+    background: #d95618;
+}
+
+.form-error {
+    margin: 0;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: #fee2e2;
+    color: #991b1b;
+    font-family: "Inter", sans-serif;
+}
+
+.profile-content-card {
+    margin: 2.5rem 0;
+    padding: 1.5rem;
+    background: #ffffffd9;
+    box-shadow: 0 4px 9px #0002;
+}
+
+.profile-page h2,
+.profile-page h3 {
+    font-family: "Love Ya Like A Sister", cursive;
+}
+
+.profile-page .posts-list,
+.profile-page .albums-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    justify-items: center;
+    gap: 1.5rem;
+}
+
+.profile-page .posts-list > *,
+.profile-page .albums-list > * {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-page .posts-list article {
+    max-width: 400px;
+}
+
+.profile-page .create-post,
+.profile-page .album-form,
+.profile-page .edit-profile {
+    max-width: 700px;
+    margin: 1rem 0;
+    padding: 1.5rem;
+    background: #95c623;
+    box-shadow: 0 4px 8px #0003;
+}
+
+.profile-page .album-form {
+    padding: 1.5rem;
+}
+
+.profile-page .album-post-selection {
+    display: grid;
+    gap: 0.65rem;
+    max-height: 15rem;
+    overflow-y: auto;
+    padding: 1rem;
+    border: 1px solid #759e1d;
+    border-radius: 0.75rem;
+    background: rgb(255 255 255 / 40%);
+    font-family: "Inter", sans-serif;
+}
+
+.profile-page .album-post-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-weight: 400;
+}
+
+.profile-page .friends-container {
+    padding: 1rem;
+    background: #45b2dc;
+}
+
+.profile-page .friends-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.profile-page .friend-card {
+    padding: 0.5rem 1rem;
+    background: #082653;
+    color: white;
+}
+
+@media (max-width: 850px) {
+    .profile-page {
+        padding: 1rem;
+        padding-top: 7rem;
+    }
+
+    .profile-content {
+        padding-right: 0;
+    }
+
+}
+
+@media (max-width: 560px) {
+    .profile-info {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        gap: 1.5rem;
+    }
+
+    .profile-avatar {
+        width: min(75%, 240px);
+    }
+
+    .profile-details {
+        width: min(90%, 350px);
+        transform: rotate(5deg);
+    }
+
+    .profile-content-card {
+        padding: 1rem;
+    }
+}

@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import PostDisplay from "../components/PostDisplay";
+import PostActions from "../components/PostActions";
 import ImageComponent from "../components/ImageComponent";
 import Comments from "../components/Comments";
-import EditPost from "../components/EditPost";
 import "../styles/Posts.css";
 
 function Post() {
@@ -37,35 +37,36 @@ function Post() {
   return (
     <>
       <Navbar name="Post"></Navbar>
-      <div className="post-page">
-        <div className="post-main">
-          <section className="post-image-section">
-            <ImageComponent src={post?.image} alt={post?.caption || "Post image"} />
-          </section>
-
-          <section className="post-details-section">
-            {error && <p role="alert">{error}</p>}
-            {post && (
-              <>
+      <main className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-4 py-8">
+        {error && <p className="w-full text-center" role="alert">{error}</p>}
+        {post && (
+          <>
+            <article className="relative box-border mx-auto flex aspect-[1543/1786] w-full max-w-[500px] flex-col items-center justify-center gap-5 bg-[url('/orangeNote.png')] bg-center bg-no-repeat bg-[length:100%_100%] px-8 py-12 font-['Love_Ya_Like_A_Sister'] text-white sm:px-14">
+              <section className="flex min-h-0 w-full flex-1 justify-center">
+                <ImageComponent src={post.image} alt={post.caption || "Post image"} />
+              </section>
+              <section className="w-full max-w-xl">
                 <PostDisplay
-                  postId={postId}
                   username={post.username ?? post.postUser}
                   date={post.createdAt ?? post.date}
                   caption={post.caption}
-                  likes={post.likes}
                 />
-              
-              </>
-            )}
-          </section>
-
-         
-
-          <section className="comments-section">
-            <Comments postId={postId} comments={post?.comments ?? []} onPostUpdated={setPost} />
-          </section>
-        </div>
-      </div>
+              </section>
+              <PostActions postId={postId} likes={post.likes} />
+            </article>
+            <section className="w-full max-w-xl rounded-xl bg-[#95c623] p-4 text-gray-900">
+              <button
+                className="mb-3 rounded-full bg-green-900 px-4 py-2 text-white hover:bg-green-950"
+                type="button"
+                onClick={() => document.getElementById("post-comment-input")?.focus()}
+              >
+                Comment
+              </button>
+              <Comments postId={postId} comments={post.comments ?? []} onPostUpdated={setPost} />
+            </section>
+          </>
+        )}
+      </main>
     </>
   );
 }
