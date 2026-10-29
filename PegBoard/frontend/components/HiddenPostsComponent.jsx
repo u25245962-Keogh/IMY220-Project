@@ -10,14 +10,19 @@ function HiddenPostsComponent({ posts = [] }) {
   }
 
   return (
-    <section className="mx-auto mt-10 w-full max-w-5xl px-4" aria-label="Hidden posts">
+    <section
+      className=" mx-auto mt-10 w-full max-w-5xl px-4 "
+      aria-label="Hidden posts"
+    >
       <button
         type="button"
-        className="rounded-full bg-sky-900 px-4 py-2 font-['Love_Ya_Like_A_Sister'] text-white hover:bg-sky-800"
+        className="rounded-full bg-sky-900 px-4 py-2 font-['Love_Ya_Like_A_Sister'] text-white hover:bg-sky-800 "
         onClick={() => setIsExpanded((expanded) => !expanded)}
         aria-expanded={isExpanded}
       >
-        {isExpanded ? "Hide hidden posts" : `Show hidden posts (${posts.length})`}
+        {isExpanded
+          ? "Hide hidden posts"
+          : `Show hidden posts (${posts.length})`}
       </button>
       {isExpanded && (
         <div className="posts-list mt-4 flex-row justify-items-center">

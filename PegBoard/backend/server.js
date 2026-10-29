@@ -150,29 +150,35 @@ app.get("/api/reports", async (req, res) => {
 });
 
 app.get("/api/hidden-posts", async (_req, res) => {
-  //console.log("sdasdasdasd")
   try {
     const db = getDB();
-    const reports = await db.collection("reports")
-      .find({ "userIds.1": { $exists: true } })
-      .toArray();
-    const postIds = reports
-      .map((report) => report.postId)
-      .filter((postId) => typeof postId === "string" && ObjectId.isValid(postId));
+    const reports = await db.collection("reports").find().toArray();
+    const reportsByPostId = new Map();
+    for (const report of reports) {
+      if (typeof report.postId !== "string" || !ObjectId.isValid(report.postId)) {
+        continue;
+      }
+
+      const reportCount = Array.isArray(report.userIds) ? report.userIds.length : 1;
+      reportsByPostId.set(
+        report.postId,
+        (reportsByPostId.get(report.postId) ?? 0) + reportCount,
+      );
+    }
+    const postIds = [...reportsByPostId.keys()];
     const posts = postIds.length
       ? await db.collection("posts")
         .find({ _id: { $in: postIds.map((postId) => new ObjectId(postId)) } })
         .toArray()
       : [];
-    const reportsByPostId = new Map(
-      reports.map((report) => [report.postId, report.userIds.length]),
-    );
 
     return res.status(200).json(
-      posts.map((post) => ({
-        ...post,
-        reportCount: reportsByPostId.get(post._id.toString()) ?? 0,
-      })),
+      posts
+        .filter((post) => (reportsByPostId.get(post._id.toString()) ?? 0) >= 2)
+        .map((post) => ({
+          ...post,
+          reportCount: reportsByPostId.get(post._id.toString()),
+        })),
     );
   } catch (error) {
     return res.status(500).json({ message: "Server error", error: error.message });
@@ -390,31 +396,25 @@ app.post("/api/posts/:id/reports", async (req, res) => {
     }
 
     const reportsCollection = db.collection("reports");
-    const existingReport = await reportsCollection.findOne({ postId });
-    if (existingReport?.userIds?.includes(reporterId)) {
+    const existingReport = await reportsCollection.findOne({
+      postId,
+      $or: [{ userId: reporterId }, { userIds: reporterId }],
+    });
+    if (existingReport) {
       return res.status(409).json({ message: "You have already reported this post" });
     }
 
-    const update = {
-      $setOnInsert: { postId },
-      $push: { reason: selectedReason },
-      $addToSet: { userIds: reporterId },
+    const report = {
+      postId,
+      userId: reporterId,
+      reason: selectedReason,
+      createdAt: new Date(),
     };
     try {
-      await reportsCollection.updateOne(
-        { postId, userIds: { $ne: reporterId } },
-        update,
-        { upsert: true },
-      );
+      await reportsCollection.insertOne(report);
     } catch (error) {
       if (error.code === 11000) {
-        const retry = await reportsCollection.updateOne(
-          { postId, userIds: { $ne: reporterId } },
-          update,
-        );
-        if (retry.matchedCount === 0) {
-          return res.status(409).json({ message: "You have already reported this post" });
-        }
+        return res.status(409).json({ message: "You have already reported this post" });
       } else {
         throw error;
       }
@@ -656,7 +656,7 @@ app.delete("/api/posts/:id", async (req, res) => {
     if (result.deletedCount === 0) {
       return res.status(404).json({ message: "Post not found" });
     }
-    await db.collection("reports").deleteOne({ postId: req.params.id });
+    await db.collection("reports").deleteMany({ postId: req.params.id });
 
     if (
       typeof post.image === "string" &&
@@ -1135,8 +1135,21 @@ app.use((error, req, res, next) => {
 
 
 connectDB()
-  .then(() => {
-    return getDB().collection("reports").createIndex({ postId: 1 }, { unique: true });
+  .then(async () => {
+    const reportsCollection = getDB().collection("reports");
+    const indexes = await reportsCollection.indexes();
+    const uniquePostIdIndex = indexes.find((index) =>
+      index.unique &&
+      Object.keys(index.key).length === 1 &&
+      index.key.postId === 1
+    );
+    if (uniquePostIdIndex) {
+      await reportsCollection.dropIndex(uniquePostIdIndex.name);
+    }
+    return reportsCollection.createIndex(
+      { postId: 1, userId: 1 },
+      { unique: true },
+    );
   })
   .then(() => {
     app.listen(PORT, () => {

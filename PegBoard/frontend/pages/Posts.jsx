@@ -37,30 +37,45 @@ function Posts() {
       <Navbar name="Posts"></Navbar>
 
       <div className="">
-        {error && <p role="alert">{error}</p>}
-        {sortedPosts.map((post, index) => (
-          <div key={post._id ?? post.id ?? index}>
-            <PostComponent
-              id={post._id}
-              username={post.postUser ?? post.username}
-              date={post.date}
-              image={post.image}
-              caption={post.caption}
-              hashtags={post.hastags ?? post.hashtags}
-              userId={post.userId}
-              delete={user?.username === "Admin" && (
-                <DeletePost
-                  postId={post._id}
-                  onDelete={(deletedPostId) =>
-                    setPosts((current) =>
-                      current.filter((item) => String(item._id ?? item.id) !== String(deletedPostId)),
-                    )
-                  }
-                />
-              )}
-            />
-          </div>
-        ))}
+        {error && (
+          <p
+            role="alert"
+            className="justify-self-center font-['Rubik_Spray_Paint'] translate-y-106 text-2xl"
+          >
+            {error}
+          </p>
+        )}
+        <div className="grid justify-items-center gap-3">
+          {sortedPosts.map((post, index) => (
+            <div key={post._id ?? post.id ?? index}>
+              <PostComponent
+                id={post._id}
+                username={post.postUser ?? post.username}
+                date={post.date}
+                image={post.image}
+                caption={post.caption}
+                hashtags={post.hastags ?? post.hashtags}
+                userId={post.userId}
+                delete={
+                  user?.username === "Admin" && (
+                    <DeletePost
+                      postId={post._id}
+                      onDelete={(deletedPostId) =>
+                        setPosts((current) =>
+                          current.filter(
+                            (item) =>
+                              String(item._id ?? item.id) !==
+                              String(deletedPostId),
+                          ),
+                        )
+                      }
+                    />
+                  )
+                }
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );

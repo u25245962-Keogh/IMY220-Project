@@ -167,17 +167,29 @@ function Home() {
           <section className="home-users flex flex-wrap items-center justify-center gap-4">
             <h2>Users</h2>
             {filteredUsers.map((person) => (
-              <ProfilePreview key={person._id ?? person.id ?? person.username} user={person} />
+              <ProfilePreview
+                key={person._id ?? person.id ?? person.username}
+                user={person}
+              />
             ))}
           </section>
         )}
-        {feedError && <p role="alert">{feedError}</p>}
+        {feedError && (
+          <p
+            role="alert"
+            className="justify-self-center font-['Rubik_Spray_Paint'] translate-y-100 text-2xl"
+          >
+            {feedError}
+          </p>
+        )}
         {hasNoFriendContent ? (
           <div
             className="mx-auto mt-25 flex min-h-95 w-full max-w-md items-center justify-center bg-contain bg-center bg-no-repeat px-12 pb-6 pt-12 text-center font-['Love_Ya_Like_A_Sister'] text-xl text-[#082653]"
             style={{ backgroundImage: `url(${blueNote})` }}
           >
-            <p className="text-white">None of your friends have shared anything</p>
+            <p className="text-white">
+              None of your friends have shared anything
+            </p>
           </div>
         ) : (
           <>
@@ -186,7 +198,10 @@ function Home() {
                 posts={feedError || !friendFeedReady ? [] : filteredPosts}
                 onDelete={(deletedPostId) =>
                   setContent((current) =>
-                    current.filter((post) => String(post._id ?? post.id) !== String(deletedPostId)),
+                    current.filter(
+                      (post) =>
+                        String(post._id ?? post.id) !== String(deletedPostId),
+                    ),
                   )
                 }
               />
@@ -196,7 +211,11 @@ function Home() {
                 posts={feedError || !friendFeedReady ? [] : filteredAlbums}
                 onDelete={(deletedAlbumId) =>
                   setAlbums((current) =>
-                    current.filter((album) => String(album._id ?? album.id) !== String(deletedAlbumId)),
+                    current.filter(
+                      (album) =>
+                        String(album._id ?? album.id) !==
+                        String(deletedAlbumId),
+                    ),
                   )
                 }
               />
@@ -204,7 +223,9 @@ function Home() {
           </>
         )}
         {friendFeedReady && !feedError && (
-          <HiddenPostsComponent posts={friendHiddenPosts} />
+
+            <HiddenPostsComponent posts={friendHiddenPosts} />
+          
         )}
       </div>
     </>

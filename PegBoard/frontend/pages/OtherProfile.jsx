@@ -24,6 +24,7 @@ function OtherProfile() {
   const [friendActionMessage, setFriendActionMessage] = useState("");
   const { id: profileId } = useParams();
   const { user } = useAuth();
+  const viewerIsAdmin = user?.username === "Admin";
 
   useEffect(() => {
     let isActive = true;
@@ -50,25 +51,31 @@ function OtherProfile() {
         if (!isActive) return;
         setProfile(data);
 
-        let viewerIsFriend = Boolean(user?.id) && String(user.id) === String(data._id);
+        let viewerIsFriend =
+          viewerIsAdmin ||
+          (Boolean(user?.id) && String(user.id) === String(data._id));
         if (user?.id && String(user.id) !== String(data._id)) {
-          const ownProfileResponse = await fetch(
-            `http://localhost:3000/api/users/${encodeURIComponent(user.id)}`,
-          );
-          const ownProfile = await ownProfileResponse.json();
-          if (!ownProfileResponse.ok) {
-            throw new Error(ownProfile.message || "Unable to check your friends.");
-          }
-          if (isActive) {
-            const ownFriends = Array.isArray(ownProfile.friends)
-              ? ownProfile.friends
-              : [];
-            viewerIsFriend = ownFriends.some(
-              (friend) =>
-                String(friend?._id ?? friend?.id ?? friend) === String(data._id) ||
-                String(friend?._id ?? friend?.id ?? friend) === data.username,
+          if (!viewerIsAdmin) {
+            const ownProfileResponse = await fetch(
+              `http://localhost:3000/api/users/${encodeURIComponent(user.id)}`,
             );
-            setIsFriend(viewerIsFriend);
+            const ownProfile = await ownProfileResponse.json();
+            if (!ownProfileResponse.ok) {
+              throw new Error(ownProfile.message || "Unable to check your friends.");
+            }
+            if (isActive) {
+              const ownFriends = Array.isArray(ownProfile.friends)
+                ? ownProfile.friends
+                : [];
+              viewerIsFriend = ownFriends.some(
+                (friend) =>
+                  String(friend?._id ?? friend?.id ?? friend) === String(data._id) ||
+                  String(friend?._id ?? friend?.id ?? friend) === data.username,
+              );
+              setIsFriend(viewerIsFriend);
+            }
+          } else if (isActive) {
+            setIsFriend(false);
           }
         } else if (isActive) {
           setIsFriend(false);
@@ -114,7 +121,7 @@ function OtherProfile() {
     return () => {
       isActive = false;
     };
-  }, [profileId, user?.id]);
+  }, [profileId, user?.id, viewerIsAdmin]);
 
   const handleFriendAction = async () => {
     if (!user?.id || !profile?._id) return;
@@ -185,6 +192,7 @@ function OtherProfile() {
 
   const { username, name, surname, bio } = profile;
   const canViewPrivateProfile =
+    viewerIsAdmin ||
     (Boolean(user?.id) && String(user.id) === String(profile._id)) ||
     (!friendshipLoading && isFriend);
   const fullName = [name, surname].filter(Boolean).join(" ");

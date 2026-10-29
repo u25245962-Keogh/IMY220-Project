@@ -10,7 +10,11 @@ import blueNote from "../assests/blueNote.png";
 function ReportedPostComponent({ report, onDelete }) {
   const post = report.post;
   const [profileImage, setProfileImage] = useState("");
-  const reasons = Array.isArray(report.reason) ? report.reason : [];
+  const reasons = Array.isArray(report.reason)
+    ? report.reason
+    : typeof report.reason === "string"
+      ? [report.reason]
+      : [];
   const hashtags = Array.isArray(post?.hashtags)
     ? post.hashtags
     : Array.isArray(post?.hastags)
