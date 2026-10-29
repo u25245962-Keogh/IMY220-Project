@@ -1,5 +1,7 @@
 import Navbar from "../components/Navbar";
 import PostComponent from "../components/PostComponent";
+import DeletePost from "../components/DeletePost";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import sortByDateDescending from "../utils/sortByDate";
 
@@ -7,6 +9,7 @@ function Posts() {
 
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState("");
+  const { user } = useAuth();
   const sortedPosts = sortByDateDescending(posts);
 
   useEffect(() => {
@@ -40,11 +43,21 @@ function Posts() {
             <PostComponent
               id={post._id}
               username={post.postUser ?? post.username}
-              date={post.createdAt ?? post.date}
+              date={post.date}
               image={post.image}
               caption={post.caption}
               hashtags={post.hastags ?? post.hashtags}
               userId={post.userId}
+              delete={user?.username === "Admin" && (
+                <DeletePost
+                  postId={post._id}
+                  onDelete={(deletedPostId) =>
+                    setPosts((current) =>
+                      current.filter((item) => String(item._id ?? item.id) !== String(deletedPostId)),
+                    )
+                  }
+                />
+              )}
             />
           </div>
         ))}

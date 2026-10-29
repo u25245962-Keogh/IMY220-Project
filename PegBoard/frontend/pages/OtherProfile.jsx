@@ -50,6 +50,7 @@ function OtherProfile() {
         if (!isActive) return;
         setProfile(data);
 
+        let viewerIsFriend = Boolean(user?.id) && String(user.id) === String(data._id);
         if (user?.id && String(user.id) !== String(data._id)) {
           const ownProfileResponse = await fetch(
             `http://localhost:3000/api/users/${encodeURIComponent(user.id)}`,
@@ -62,37 +63,38 @@ function OtherProfile() {
             const ownFriends = Array.isArray(ownProfile.friends)
               ? ownProfile.friends
               : [];
-            setIsFriend(
-              ownFriends.some(
-                (friend) =>
-                  String(friend?._id ?? friend?.id ?? friend) === String(data._id) ||
-                  String(friend?._id ?? friend?.id ?? friend) === data.username,
-              ),
+            viewerIsFriend = ownFriends.some(
+              (friend) =>
+                String(friend?._id ?? friend?.id ?? friend) === String(data._id) ||
+                String(friend?._id ?? friend?.id ?? friend) === data.username,
             );
+            setIsFriend(viewerIsFriend);
           }
         } else if (isActive) {
           setIsFriend(false);
         }
 
-        try {
-          const albumsResponse = await fetch("http://localhost:3000/api/albums");
-          const albumsData = await albumsResponse.json();
-          if (!albumsResponse.ok) {
-            throw new Error(albumsData.message || "Unable to load this user's albums.");
-          }
+        if (viewerIsFriend) {
+          try {
+            const albumsResponse = await fetch("http://localhost:3000/api/albums");
+            const albumsData = await albumsResponse.json();
+            if (!albumsResponse.ok) {
+              throw new Error(albumsData.message || "Unable to load this user's albums.");
+            }
 
-          if (isActive) {
-            setAlbums(
-              (Array.isArray(albumsData) ? albumsData : []).filter(
-                (album) => String(album.userId) === String(data._id),
-              ),
-            );
-          }
-        } catch (albumsFetchError) {
-          if (isActive) {
-            setAlbumsError(
-              albumsFetchError.message || "Unable to load this user's albums.",
-            );
+            if (isActive) {
+              setAlbums(
+                (Array.isArray(albumsData) ? albumsData : []).filter(
+                  (album) => String(album.userId) === String(data._id),
+                ),
+              );
+            }
+          } catch (albumsFetchError) {
+            if (isActive) {
+              setAlbumsError(
+                albumsFetchError.message || "Unable to load this user's albums.",
+              );
+            }
           }
         }
       } catch (fetchError) {
@@ -181,7 +183,10 @@ function OtherProfile() {
     );
   }
 
-  const { username, name, surname, email, bio } = profile;
+  const { username, name, surname, bio } = profile;
+  const canViewPrivateProfile =
+    (Boolean(user?.id) && String(user.id) === String(profile._id)) ||
+    (!friendshipLoading && isFriend);
   const fullName = [name, surname].filter(Boolean).join(" ");
   const profileImage = resolveProfileImageUrl(
     profile.image || getCachedProfileImage(profile._id),
@@ -211,8 +216,7 @@ function OtherProfile() {
               <div className="profile-details profile-note">
                 <span className="profile-pin" aria-hidden="true" />
                 <h2>{fullName || username || "Unnamed user"}</h2>
-                {email && <p>{email}</p>}
-                {bio && <p>{bio}</p>}
+                {canViewPrivateProfile && bio && <p>{bio}</p>}
               </div>
             </div>
             {user?.id && String(user.id) !== String(profile._id) && (
@@ -248,32 +252,48 @@ function OtherProfile() {
             )}
           </section>
 
-          <section className="user-posts-section profile-content-card">
-            <UserPosts
-              postUser={username}
-              waitingForProfile={!username}
-              profileError={!username ? "This profile has no username." : ""}
-            />
-          </section>
+          {canViewPrivateProfile ? (
+            <>
+              <section className="user-posts-section profile-content-card font-['Love_Ya_Like_A_Sister']">
+                <UserPosts
+                  postUser={username}
+                  waitingForProfile={!username}
+                  profileError={
+                    !username ? "This profile has no username." : ""
+                  }
+                />
+              </section>
 
-          <section className="profile-content-card">
-            <div className="profile-albums">
-              <h2>Albums</h2>
-              {albumsLoading ? (
-                <p>Loading albums...</p>
-              ) : albumsError ? (
-                <p role="alert">{albumsError}</p>
-              ) : albums.length > 0 ? (
-                <FeedAlbums posts={albums} />
-              ) : (
-                <p>No albums yet.</p>
-              )}
-            </div>
-          </section>
+              <section className="profile-content-card font-['Love_Ya_Like_A_Sister']">
+                <div className="profile-albums">
+                  <h2>Albums</h2>
+                  {albumsLoading ? (
+                    <p>Loading albums...</p>
+                  ) : albumsError ? (
+                    <p role="alert">{albumsError}</p>
+                  ) : albums.length > 0 ? (
+                    <FeedAlbums posts={albums} />
+                  ) : (
+                    <p className="justify-self-center">No albums yet.</p>
+                  )}
+                </div>
+              </section>
 
-          <section className="friends-section profile-content-card">
-            <Friends friends={Array.isArray(profile.friends) ? profile.friends : []} />
-          </section>
+              <section className="friends-section profile-content-card">
+                <Friends
+                  friends={
+                    Array.isArray(profile.friends) ? profile.friends : []
+                  }
+                />
+              </section>
+            </>
+          ) : (
+            <p className="profile-content-card">
+              {friendshipLoading
+                ? "Checking friendship..."
+                : "Add this user as a friend to see their bio, posts, and friends."}
+            </p>
+          )}
         </div>
       </main>
     </>

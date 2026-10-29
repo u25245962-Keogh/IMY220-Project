@@ -44,17 +44,24 @@ function Comments({ postId, comments = [], onPostUpdated }) {
   };
 
   return (
-    <div className="flex w-full flex-col gap-3">
+    <div className="flex w-full flex-col gap-3 font-['Love_Ya_Like_A_Sister']">
       <h3 className="m-0 text-xl">Comments</h3>
       <div className="flex max-h-72 flex-col gap-3 overflow-y-auto rounded-xl bg-white/30 p-4">
         {comments.map((comment, index) => {
-          const text = typeof comment === "string" ? comment : comment?.comment ?? comment?.text ?? "";
-          const username = typeof comment === "object" && comment !== null
-            ? comment.username ?? comment.user ?? ""
-            : "";
+          const text =
+            typeof comment === "string"
+              ? comment
+              : (comment?.comment ?? comment?.text ?? "");
+          const username =
+            typeof comment === "object" && comment !== null
+              ? (comment.username ?? comment.user ?? "")
+              : "";
 
           return (
-            <div key={comment?._id ?? comment?.id ?? `${index}-${text}`} className="break-words">
+            <div
+              key={comment?._id ?? comment?.id ?? `${index}-${text}`}
+              className="break-words"
+            >
               {username && <strong>{username}</strong>}
               <p className="m-0">{text}</p>
             </div>
@@ -72,7 +79,11 @@ function Comments({ postId, comments = [], onPostUpdated }) {
           required
           disabled={isSubmitting}
         />
-        <button type="submit" className="rounded-lg bg-green-900 px-4 py-2 text-white hover:bg-green-950 disabled:opacity-60" disabled={isSubmitting || !newComment.trim()}>
+        <button
+          type="submit"
+          className="rounded-lg bg-green-900 px-4 py-2 text-white hover:bg-green-950 disabled:opacity-60 font-['Rubik_Spray_Paint']"
+          disabled={isSubmitting || !newComment.trim()}
+        >
           Post
         </button>
       </form>

@@ -1,0 +1,150 @@
+.reports-page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding-top: 8rem;
+  padding-bottom: 3rem;
+  background-color: #fafafa;
+  background-image: radial-gradient(circle, #aaa 4px, transparent 5px);
+  background-size: 67px 67px;
+  color: #082653;
+  font-family: "Love Ya Like A Sister", cursive;
+}
+
+.reports-page > h2 {
+  margin: 0 0 1rem;
+  color: #082653;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  text-align: center;
+  text-shadow: 0 1px 0 white;
+}
+
+.report-reasons-panel {
+  box-sizing: border-box;
+  width: min(100%, 30rem);
+  min-height: 25rem;
+  margin: 0 auto;
+  padding: 5rem 3rem 2rem;
+  background-image: url("../assests/blueNote.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #082653;
+  filter: drop-shadow(0 5px 5px rgb(0 0 0 / 25%));
+}
+
+.report-reasons-panel h2 {
+  margin: 0 0 1rem;
+  font-size: 1.75rem;
+  text-align: center;
+}
+
+.report-reasons-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.report-reason-row,
+.report-reason-add {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.report-reasons-panel input {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  max-width: 20rem;
+  flex: 0 1 20rem;
+  border: 2px solid #082653;
+  border-radius: 0.5rem;
+  background: rgb(255 255 255 / 90%);
+  padding: 0.5rem 0.75rem;
+  color: #082653;
+  font-family: Inter, sans-serif;
+}
+
+.report-reasons-panel button {
+  border: 2px solid #082653;
+  border-radius: 9999px;
+  background: #082653;
+  padding: 0.45rem 1rem;
+  color: white;
+  font-family: "Love Ya Like A Sister", cursive;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.report-reasons-panel button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #0c407a;
+}
+
+.report-reasons-panel .report-reason-action {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+  color: #082653;
+}
+
+.report-reasons-panel .report-reason-action:hover:not(:disabled) {
+  background: transparent;
+  text-decoration: underline;
+}
+
+.report-reasons-panel button:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+
+.report-reasons-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.report-save-button {
+  justify-self: center;
+  margin-top: 0.25rem;
+}
+
+.reports-error {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 0.5rem;
+  background: #fee2e2;
+  padding: 0.65rem 1rem;
+  color: #991b1b;
+  font-family: Inter, sans-serif;
+}
+
+.reported-posts-section {
+  margin-top: 2.5rem;
+}
+
+.reports-empty-state {
+  width: fit-content;
+  margin: 1rem auto;
+  border-radius: 0.75rem;
+  background: #e0f2fe;
+  padding: 0.75rem 1.25rem;
+  color: #082653;
+  font-family: Inter, sans-serif;
+}
+
+@media (max-width: 640px) {
+  .reports-page {
+    padding-top: 11rem;
+  }
+
+  .report-reasons-panel {
+    min-height: 22rem;
+    padding: 4.5rem 1.5rem 1.5rem;
+  }
+
+  .report-reason-row,
+  .report-reason-add {
+    align-items: stretch;
+  }
+}

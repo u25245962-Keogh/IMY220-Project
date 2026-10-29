@@ -5,7 +5,7 @@ function PostDisplay({ username, caption, date }) {
     <div className="flex w-full flex-col gap-3 text-center">
       <div className="flex flex-col items-center">
         <h2 className="m-0 break-words text-2xl">{username}</h2>
-        {date && <time className="text-sm" dateTime={date}>{new Date(date).toLocaleString()}</time>}
+        {date}
       </div>
       <p className="m-0 max-w-full break-words text-lg">{caption}</p>
     </div>

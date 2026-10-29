@@ -11,11 +11,8 @@ a:hover {
 }
 
 body{
-  
-    background-image: url(/frontend/assests/background.png);
-
-    
-
-background-repeat: repeat;
+    background-color: #fafafa;
+    background-image: radial-gradient(circle, #aaa 5px, transparent 6px);
+    background-size: 67px 67px;
 
 }

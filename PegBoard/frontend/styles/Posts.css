@@ -2,3 +2,45 @@
     position: relative;
     top: 100px;
 }
+
+.card-delete-overlay {
+  position: absolute;
+  z-index: 10;
+  top: 0.8rem;
+  right: 0.8rem;
+}
+
+.delete-control-form {
+  margin: 0;
+}
+
+.delete-cross-button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 9999px;
+  background: #dc2626;
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 35%);
+}
+
+.delete-cross-button:hover:not(:disabled) {
+  background: #991b1b;
+}
+
+.delete-cross-button:focus-visible {
+  outline: 3px solid #082653;
+  outline-offset: 2px;
+}
+
+.delete-cross-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}

@@ -1,14 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../styles/Posts.css";
 
 function CreatePost({ onSubmit, userId }) {
   const [formData, setFormData] = useState({
     caption: "",
-    image: "",
     Hashtags: "",
   });
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+  }, [imagePreview]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,16 +27,8 @@ function CreatePost({ onSubmit, userId }) {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({
-          ...prev,
-          image: reader.result,
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
+    setSelectedImage(file ?? null);
+    setImagePreview(file ? URL.createObjectURL(file) : "");
   };
 
   const handleSubmit = async (e) => {
@@ -37,13 +36,14 @@ function CreatePost({ onSubmit, userId }) {
     setError("");
     setIsSubmitting(true);
     try {
-      await onSubmit({ ...formData, userId });
+      await onSubmit({ ...formData, image: selectedImage, userId });
 
       setFormData({
         caption: "",
-        image: "",
         Hashtags: "",
       });
+      setSelectedImage(null);
+      setImagePreview("");
     } catch (submitError) {
       setError(submitError.message || "Could not create post.");
     } finally {
@@ -66,9 +66,9 @@ function CreatePost({ onSubmit, userId }) {
             className="image-input profile-file-input"
           />
           <p className="form-help">Choose an image to share with your post.</p>
-          {formData.image && (
+          {imagePreview && (
             <div className="image-preview profile-image-preview">
-              <img src={formData.image} alt="Preview" />
+              <img src={imagePreview} alt="Preview" />
             </div>
           )}
         </div>

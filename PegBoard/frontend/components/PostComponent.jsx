@@ -6,7 +6,6 @@ import {
   resolveProfileImageUrl,
 } from "../utils/profileImage";
 
-
 function PostComponent(props) {
   const [profileImage, setProfileImage] = useState("");
   const hashtags = Array.isArray(props.hashtags)
@@ -36,14 +35,20 @@ function PostComponent(props) {
   }, [props.userId]);
 
   return (
-    <article className="box-border grid aspect-[1543/1786] w-full max-w-[400px] grid-rows-[minmax(0,1fr)_auto_auto] justify-items-center gap-3 overflow-hidden bg-[url('/orangeNote.png')] bg-center bg-no-repeat bg-[length:100%_100%] px-8 pb-2 pt-8 font-['Love_Ya_Like_A_Sister']">
+    <article className="relative box-border grid aspect-[1543/1786] w-full max-w-[400px] grid-rows-[minmax(0,1fr)_auto_auto] justify-items-center gap-3 overflow-hidden bg-[url('/orangeNote.png')] bg-center bg-no-repeat bg-[length:100%_100%] px-8 pb-2 pt-8 font-['Love_Ya_Like_A_Sister']">
+      {props.delete && (
+        <div className="card-delete-overlay">
+          {props.delete}
+        </div>
+      )}
       <Link
         className="flex min-h-0 w-full items-end justify-center overflow-hidden pb-1"
         to={`/posts/${props.id}`}
       >
         <img
           className="block h-[90%] max-h-[90%] w-[90%] max-w-[90%] translate-y-8 translate-x-3 object-contain"
-          src={props.image}
+          src={props.image ? resolveProfileImageUrl(props.image) : undefined}
+          alt={props.caption || "Post image"}
         />
       </Link>
 
@@ -84,7 +89,6 @@ function PostComponent(props) {
       </div>
 
       <div className="flex max-w-full flex-wrap items-center justify-center gap-2 overflow-hidden">
-        {props.delete}
         {props.edit}
       </div>
     </article>

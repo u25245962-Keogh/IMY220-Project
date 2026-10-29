@@ -72,13 +72,19 @@ function UserPosts({ refreshKey, postUser, waitingForProfile, profileError }) {
               username={post.postUser}
               image={post.image}
               caption={post.caption}
+              date={post.date}
               hashtags={post.hastags ?? post.hashtags}
               edit={!postUser && <EditPost />}
-              delete={!postUser && <DeletePost postId={post._id} onDelete={handleDelete} />}
+              delete={
+                (user?.username === "Admin" ||
+                  (!postUser && String(post.userId) === user?.id)) && (
+                  <DeletePost postId={post._id} onDelete={handleDelete} />
+                )
+              }
             />
           ))
         ) : (
-          <p>No posts yet. Create your first post!</p>
+          <p className="text-gray-400">No posts yet. Create your first post!</p>
         )}
       </div>
     </div>

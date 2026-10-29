@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { Buffer } from "node:buffer";
 import { randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
@@ -9,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { connectDB, getDB } from "./db.js";
 import { ObjectId } from "mongodb"; 
 import { MongoClient } from "mongodb";
+import multer from "multer";
 
 
 
@@ -19,10 +19,165 @@ const app = express();
 const PORT = 3000;
 const backendDirectory = dirname(fileURLToPath(import.meta.url));
 const profilePicturesDirectory = join(backendDirectory, "uploads", "profile-pictures");
+const postImagesDirectory = join(backendDirectory, "uploads", "posts");
+const postImageExtensions = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/webp": "webp",
+};
+const uploadImage = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (_req, file, callback) => {
+    if (!Object.hasOwn(postImageExtensions, file.mimetype)) {
+      const error = new Error("Image must be a JPEG, PNG, GIF, or WebP image");
+      error.code = "INVALID_IMAGE_TYPE";
+      callback(error);
+      return;
+    }
+    callback(null, true);
+  },
+});
+const defaultReportReasons = [
+  "Spam or misleading content",
+  "Harassment or hate speech",
+  "Inappropriate content",
+  "Violence or dangerous content",
+  "Other",
+];
+
+async function isAdminUser(userId) {
+  if (typeof userId !== "string" || !ObjectId.isValid(userId)) {
+    return false;
+  }
+
+  const user = await getDB()
+    .collection("users")
+    .findOne({ _id: new ObjectId(userId) }, { projection: { username: 1 } });
+  return user?.username === "Admin";
+}
+
+async function canManageContent(userId, ownerId) {
+  if (typeof userId !== "string" || !ObjectId.isValid(userId)) {
+    return false;
+  }
+  if (userId === ownerId || userId.toLowerCase() === ownerId?.toLowerCase()) {
+    const user = await getDB()
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) }, { projection: { _id: 1 } });
+    if (user) return true;
+  }
+  return isAdminUser(userId);
+}
+
+async function getReportReasons() {
+  const settings = await getDB()
+    .collection("reportSettings")
+    .findOne({ _id: "reasons" });
+  return settings?.reasons ?? defaultReportReasons;
+}
 
 app.use(cors());
 app.use(express.json({ limit: "28mb" }));
 app.use("/uploads/profile-pictures", express.static(profilePicturesDirectory));
+app.use("/uploads/posts", express.static(postImagesDirectory));
+
+app.get("/api/report-reasons", async (req, res) => {
+  try {
+    return res.status(200).json({ reasons: await getReportReasons() });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.put("/api/report-reasons", async (req, res) => {
+  try {
+    const { userId, reasons } = req.body ?? {};
+    if (!(await isAdminUser(userId))) {
+      return res.status(403).json({ message: "Admin access is required" });
+    }
+
+    if (
+      !Array.isArray(reasons) ||
+      reasons.length === 0 ||
+      reasons.some((reason) => typeof reason !== "string" || !reason.trim()) ||
+      new Set(reasons.map((reason) => reason.trim().toLowerCase())).size !== reasons.length
+    ) {
+      return res.status(400).json({
+        message: "Provide at least one unique, non-empty report reason",
+      });
+    }
+
+    const cleanReasons = reasons.map((reason) => reason.trim());
+    await getDB().collection("reportSettings").updateOne(
+      { _id: "reasons" },
+      { $set: { reasons: cleanReasons } },
+      { upsert: true },
+    );
+    return res.status(200).json({ reasons: cleanReasons });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.get("/api/reports", async (req, res) => {
+  try {
+    if (!(await isAdminUser(req.query.userId))) {
+      return res.status(403).json({ message: "Admin access is required" });
+    }
+
+    const db = getDB();
+    const reports = await db.collection("reports").find().toArray();
+    const postIds = [...new Set(reports
+      .map((report) => report.postId)
+      .filter((postId) => typeof postId === "string" && ObjectId.isValid(postId)))];
+    const posts = postIds.length
+      ? await db.collection("posts")
+        .find({ _id: { $in: postIds.map((postId) => new ObjectId(postId)) } })
+        .toArray()
+      : [];
+    const postsById = new Map(posts.map((post) => [post._id.toString(), post]));
+
+    const reportsWithPosts = reports.map((report) => ({
+      ...report,
+      post: postsById.get(report.postId) ?? null,
+    }));
+    return res.status(200).json(reportsWithPosts);
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.get("/api/hidden-posts", async (_req, res) => {
+  //console.log("sdasdasdasd")
+  try {
+    const db = getDB();
+    const reports = await db.collection("reports")
+      .find({ "userIds.1": { $exists: true } })
+      .toArray();
+    const postIds = reports
+      .map((report) => report.postId)
+      .filter((postId) => typeof postId === "string" && ObjectId.isValid(postId));
+    const posts = postIds.length
+      ? await db.collection("posts")
+        .find({ _id: { $in: postIds.map((postId) => new ObjectId(postId)) } })
+        .toArray()
+      : [];
+    const reportsByPostId = new Map(
+      reports.map((report) => [report.postId, report.userIds.length]),
+    );
+
+    return res.status(200).json(
+      posts.map((post) => ({
+        ...post,
+        reportCount: reportsByPostId.get(post._id.toString()) ?? 0,
+      })),
+    );
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
 
 app.get("/api/posts", async (req, res) => {
   if (res.status(404)) {
@@ -70,7 +225,14 @@ app.get("/api/users/:user/posts", async (req, res) => {
     const db = getDB();
 
     const collection = db.collection("posts");
-    const query = { postUser: req.params.user };
+    const userIdentifier = req.params.user;
+    const query = {
+      $or: [
+        { postUser: userIdentifier },
+        { username: userIdentifier },
+        { userId: userIdentifier },
+      ],
+    };
 
     const posts = await collection.find(query).toArray();
 
@@ -81,10 +243,34 @@ app.get("/api/users/:user/posts", async (req, res) => {
   }
 });
 
-app.post("/api/posts", async (req, res) => {
+app.post("/api/posts", uploadImage.single("image"), async (req, res) => {
+  let uploadedImagePath;
+
   try {
     if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
       return res.status(400).json({ message: "Post data is required" });
+    }
+
+    let hastags;
+    try {
+      hastags = Array.isArray(req.body.hastags)
+        ? req.body.hastags
+        : JSON.parse(req.body.hastags ?? "[]");
+    } catch {
+      return res.status(400).json({ message: "Post hashtags must be a valid JSON array" });
+    }
+
+    const { postUser, userId, caption } = req.body;
+    const validPost =
+      typeof postUser === "string" && postUser.trim().length > 0 &&
+      typeof userId === "string" && userId.trim().length > 0 && ObjectId.isValid(userId.trim()) &&
+      typeof caption === "string" && caption.trim().length > 0 &&
+      Array.isArray(hastags) && hastags.every((hashtag) => typeof hashtag === "string");
+
+    if (!validPost) {
+      return res.status(400).json({
+        message: "Invalid post: expected postUser, userId, caption, and an array of hashtags",
+      });
     }
 
     const createdAt = new Date();
@@ -95,36 +281,39 @@ app.post("/api/posts", async (req, res) => {
     ].join("-");
 
     const newPost = {
-      ...req.body,
+      postUser: postUser.trim(),
+      userId: userId.trim(),
+      caption: caption.trim(),
+      hastags,
+      image: "",
       likes: 0,
       comments: [],
-      reports: [],
       date,
     };
 
-    const { postUser, userId, caption, hastags, image } = newPost;
-    const validPost =
-      typeof postUser === "string" && postUser.trim().length > 0 &&
-      typeof userId === "string" && userId.trim().length > 0 && ObjectId.isValid(userId.trim()) &&
-      typeof caption === "string" && caption.trim().length > 0 &&
-      Array.isArray(hastags) && hastags.every((hashtag) => typeof hashtag === "string") 
-     // typeof image === "string" && image.trim().length > 0 &&
-     // Number.isInteger(newPost.likes) && newPost.likes === 0 &&
-     // Array.isArray(newPost.comments);
-
-    if (!validPost) {
-      return res.status(400).json({
-        message: "Invalid post: expected postUser, userId, caption, hastags, image, and username",
-      });
+    if (req.file) {
+      const filename = `${randomUUID()}.${postImageExtensions[req.file.mimetype]}`;
+      await mkdir(postImagesDirectory, { recursive: true });
+      uploadedImagePath = join(postImagesDirectory, filename);
+      await writeFile(uploadedImagePath, req.file.buffer, { flag: "wx" });
+      newPost.image = `/uploads/posts/${filename}`;
     }
 
-    newPost.userId = userId.trim();
     const db = getDB();
     const collection = db.collection("posts");
     const result = await collection.insertOne(newPost);
 
     return res.status(201).json({ _id: result.insertedId, ...newPost });
   } catch (error) {
+    if (uploadedImagePath) {
+      try {
+        await unlink(uploadedImagePath);
+      } catch (cleanupError) {
+        if (cleanupError.code !== "ENOENT") {
+          console.error("Could not remove the failed post image upload:", cleanupError);
+        }
+      }
+    }
     return res.status(500).json({ message: "Server error", error: error.message });
   }
 });
@@ -169,18 +358,66 @@ app.post("/api/posts/:id/reports", async (req, res) => {
     if (typeof reason !== "string" || reason.trim().length === 0) {
       return res.status(400).json({ message: "A report reason is required" });
     }
+    if (typeof userId !== "string" || !ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "A valid reporting user ID is required" });
+    }
 
-    const collection = getDB().collection("posts");
-    const query = { _id: new ObjectId(req.params.id) };
-    const report = {
-      reason: reason.trim(),
-      ...(typeof userId === "string" && userId.trim() ? { userId: userId.trim() } : {}),
-      createdAt: new Date(),
-    };
-    const result = await collection.updateOne(query, { $push: { reports: report } });
+    const db = getDB();
+    const reporterId = userId.trim();
+    const reporter = await db.collection("users").findOne({
+      _id: new ObjectId(reporterId),
+    });
+    if (!reporter) {
+      return res.status(404).json({ message: "Reporting user not found" });
+    }
 
-    if (result.matchedCount === 0) {
+    const reasons = await getReportReasons();
+    const selectedReason = reasons.find((item) => item === reason.trim());
+    if (!selectedReason) {
+      return res.status(400).json({ message: "Choose a valid report reason" });
+    }
+
+    const postId = req.params.id;
+    const post = await db.collection("posts").findOne(
+      { _id: new ObjectId(postId) },
+      { projection: { userId: 1 } },
+    );
+    if (!post) {
       return res.status(404).json({ message: "Post not found" });
+    }
+    if (post.userId === reporterId) {
+      return res.status(400).json({ message: "You cannot report your own post" });
+    }
+
+    const reportsCollection = db.collection("reports");
+    const existingReport = await reportsCollection.findOne({ postId });
+    if (existingReport?.userIds?.includes(reporterId)) {
+      return res.status(409).json({ message: "You have already reported this post" });
+    }
+
+    const update = {
+      $setOnInsert: { postId },
+      $push: { reason: selectedReason },
+      $addToSet: { userIds: reporterId },
+    };
+    try {
+      await reportsCollection.updateOne(
+        { postId, userIds: { $ne: reporterId } },
+        update,
+        { upsert: true },
+      );
+    } catch (error) {
+      if (error.code === 11000) {
+        const retry = await reportsCollection.updateOne(
+          { postId, userIds: { $ne: reporterId } },
+          update,
+        );
+        if (retry.matchedCount === 0) {
+          return res.status(409).json({ message: "You have already reported this post" });
+        }
+      } else {
+        throw error;
+      }
     }
 
     return res.status(201).json({ message: "Post reported successfully" });
@@ -241,7 +478,10 @@ app.get(`/api/users`, async (req, res) => {
 
     // Add the post query here, using the route id as needed.
    // const query = {id : id};
-    const post = await collection.find({}, { projection: { _id: 1, username: 1 } }).toArray();
+    const post = await collection.find(
+      {},
+      { projection: { _id: 1, username: 1, image: 1 } },
+    ).toArray();
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
@@ -277,7 +517,7 @@ app.get(`/api/users/:id`, async (req, res) => {
   }
 });
 
-app.patch("/api/users/:id", async (req, res) => {
+app.patch("/api/users/:id", uploadImage.single("image"), async (req, res) => {
   let newImagePath;
 
   try {
@@ -285,36 +525,14 @@ app.patch("/api/users/:id", async (req, res) => {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    const editableFields = ["name", "surname", "username", "email", "bio", "image"];
+    const editableFields = ["name", "surname", "username", "email", "bio"];
     const updates = Object.fromEntries(
       editableFields
         .filter((field) => Object.prototype.hasOwnProperty.call(req.body, field))//  do any of the allowed fields exist in body
         .map((field) => [field, req.body[field]])// turn into this ["asdasd" : "sdaas"]
     );
 
-    let imageBuffer;
-    let imageExtension;
-    if (Object.prototype.hasOwnProperty.call(updates, "image")) {
-      const imageMatch = typeof updates.image === "string"
-        ? updates.image.match(/^data:image\/(jpeg|png|gif|webp);base64,([A-Za-z0-9+/]+={0,2})$/)
-        : null;
-      if (!imageMatch) {
-        return res.status(400).json({
-          message: "Profile picture must be a JPEG, PNG, GIF, or WebP image",
-        });
-      }
-
-      imageBuffer = Buffer.from(imageMatch[2], "base64");
-      if (imageBuffer.length > 20 * 1024 * 1024) {
-        return res.status(400).json({
-          message: "Profile picture must be no larger than 20 MB",
-        });
-      }
-
-      imageExtension = imageMatch[1] === "jpeg" ? "jpg" : imageMatch[1];
-    }
-
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(updates).length === 0 && !req.file) {
       return res.status(400).json({ message: "No profile fields provided" });
     }
 
@@ -327,11 +545,11 @@ app.patch("/api/users/:id", async (req, res) => {
     }
 
     const previousImagePath = existingProfile.image;
-    if (imageBuffer) {
+    if (req.file) {
       await mkdir(profilePicturesDirectory, { recursive: true });
-      const filename = `${req.params.id}-${randomUUID()}.${imageExtension}`;
+      const filename = `${req.params.id}-${randomUUID()}.${postImageExtensions[req.file.mimetype]}`;
       newImagePath = `/uploads/profile-pictures/${filename}`;
-      await writeFile(join(profilePicturesDirectory, filename), imageBuffer, { flag: "wx" });
+      await writeFile(join(profilePicturesDirectory, filename), req.file.buffer, { flag: "wx" });
       updates.image = newImagePath;
     }
 
@@ -422,10 +640,36 @@ app.delete("/api/posts/:id", async (req, res) => {
 
     const db = getDB();
     const collection = db.collection("posts");
+    const post = await collection.findOne(
+      { _id: new ObjectId(req.params.id) },
+      { projection: { userId: 1, image: 1 } },
+    );
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    if (!(await canManageContent(req.body?.userId, post.userId))) {
+      return res.status(403).json({ message: "Only the post owner or an admin can delete this post" });
+    }
+
     const result = await collection.deleteOne({ _id: new ObjectId(req.params.id) });
 
     if (result.deletedCount === 0) {
       return res.status(404).json({ message: "Post not found" });
+    }
+    await db.collection("reports").deleteOne({ postId: req.params.id });
+
+    if (
+      typeof post.image === "string" &&
+      post.image.startsWith("/uploads/posts/") &&
+      basename(post.image) === post.image.slice("/uploads/posts/".length)
+    ) {
+      try {
+        await unlink(join(postImagesDirectory, basename(post.image)));
+      } catch (cleanupError) {
+        if (cleanupError.code !== "ENOENT") {
+          console.error("Could not remove the deleted post's image:", cleanupError);
+        }
+      }
     }
 
     return res.status(200).json({ message: "Post deleted successfully" });
@@ -540,6 +784,17 @@ app.delete("/api/albums/:id", async (req, res) => {
 
     const db = getDB();
     const collection = db.collection("albums");
+    const album = await collection.findOne(
+      { _id: new ObjectId(req.params.id) },
+      { projection: { userId: 1 } },
+    );
+    if (!album) {
+      return res.status(404).json({ message: "Album not found" });
+    }
+    if (!(await canManageContent(req.body?.userId, album.userId))) {
+      return res.status(403).json({ message: "Only the album owner or an admin can delete this album" });
+    }
+
     const result = await collection.deleteOne({
       _id: new ObjectId(req.params.id),
     });
@@ -548,7 +803,7 @@ app.delete("/api/albums/:id", async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    return res.status(200).json({ message: "Post deleted successfully" });
+    return res.status(200).json({ message: "Album deleted successfully" });
   } catch (error) {
     return res
       .status(500)
@@ -851,6 +1106,16 @@ app.get("/api/content", async (req, res) => {
 });
 
 app.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).json({
+      message: "Uploaded images must be no larger than 20 MB.",
+    });
+  }
+
+  if (error.code === "INVALID_IMAGE_TYPE") {
+    return res.status(400).json({ message: error.message });
+  }
+
   if (error.type === "entity.too.large") {
     return res.status(413).json({
       message: "The post image is too large. Please upload a smaller image.",
@@ -871,9 +1136,11 @@ app.use((error, req, res, next) => {
 
 connectDB()
   .then(() => {
+    return getDB().collection("reports").createIndex({ postId: 1 }, { unique: true });
+  })
+  .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
-      //console.log(getDB())
     });
   })
   .catch((error) => {

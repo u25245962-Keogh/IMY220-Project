@@ -13,6 +13,8 @@ import OtherProfile from "./pages/OtherProfile";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import logo from "./assests/logo.png";
+import Reports from "./pages/Reports";
+import AdminRoute from "./components/AdminRoute";
 
 function HomeLogo() {
   const { pathname } = useLocation();
@@ -20,7 +22,7 @@ function HomeLogo() {
 
   return (
     <Link
-      to="/"
+      to="/home"
       className={`fixed top-4 z-[100] block ${
         isSplashPage
           ? "left-1/2 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 sm:w-96"
@@ -50,6 +52,9 @@ function App() {
               <Route path="/posts/:id" element={<Post />} />
               <Route path="/albums/:id" element={<Album />} />
               <Route path="/splash" element={<Splash />} />
+              <Route element={<AdminRoute></AdminRoute>}>
+                <Route path="/reports" element={<Reports />} />
+              </Route>
             </Route>
 
             <Route path="/login" element={<Login />} />

@@ -17,7 +17,6 @@ function ProfileAlbums() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [deletingAlbumId, setDeletingAlbumId] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -82,28 +81,10 @@ function ProfileAlbums() {
     );
   };
 
-  const handleDeleteAlbum = async (albumId) => {
-    setError("");
-    setDeletingAlbumId(albumId);
-
-    try {
-      const response = await fetch(`http://localhost:3000/api/albums/${albumId}`, {
-        method: "DELETE",
-      });
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Could not delete album.");
-      }
-
-      setAlbums((currentAlbums) =>
-        currentAlbums.filter((album) => String(album._id ?? album.id) !== albumId),
-      );
-    } catch (deleteError) {
-      setError(deleteError.message || "Could not delete album.");
-    } finally {
-      setDeletingAlbumId("");
-    }
+  const handleDeleteAlbum = (albumId) => {
+    setAlbums((currentAlbums) =>
+      currentAlbums.filter((album) => String(album._id ?? album.id) !== albumId),
+    );
   };
 
   const handleUpdateAlbum = async (albumId, updates) => {
@@ -155,7 +136,7 @@ function ProfileAlbums() {
       const contentType = response.headers.get("content-type") ?? "";
       if (!contentType.includes("application/json")) {
         throw new Error(
-          `The album API returned a non-JSON response (HTTP ${response.status}). Restart the backend from the PegBoard folder with "node backend/server.js" and try again.`,
+          `The album API returned a non-JSON response (HTTP ${response.status}). Restart the server`,
         );
       }
       const result = await response.json();
@@ -178,8 +159,7 @@ function ProfileAlbums() {
   };
 
   return (
-    <section className="profile-albums">
-      <h2>My Albums</h2>
+    <>
       {userId && username ? (
         <section className="create-post-section">
           <button
@@ -232,7 +212,11 @@ function ProfileAlbums() {
                 </fieldset>
               )}
 
-              <button className="profile-submit-button" type="submit" disabled={submitting}>
+              <button
+                className="profile-submit-button"
+                type="submit"
+                disabled={submitting}
+              >
                 {submitting ? "Creating..." : "Create Album"}
               </button>
             </form>
@@ -241,22 +225,26 @@ function ProfileAlbums() {
       ) : (
         <p>Log in to create and view your albums.</p>
       )}
+      <section className="profile-content-card font-['Love_Ya_Like_A_Sister']">
+        <h2>My Albums</h2>
 
-      {loading ? (
-        <p>Loading albums...</p>
-      ) : albums.length > 0 ? (
-        <FeedAlbums
-          posts={albums}
-          onDelete={handleDeleteAlbum}
-          deletingAlbumId={deletingAlbumId}
-          onUpdate={handleUpdateAlbum}
-          userPosts={userPosts}
-        />
-      ) : (
-        <p>You have not created any albums yet.</p>
-      )}
-      {error && <p role="alert">{error}</p>}
-    </section>
+        {loading ? (
+          <p>Loading albums...</p>
+        ) : albums.length > 0 ? (
+          <FeedAlbums
+            posts={albums}
+            onDelete={handleDeleteAlbum}
+            onUpdate={handleUpdateAlbum}
+            userPosts={userPosts}
+          />
+        ) : (
+          <p className="justify-self-center text-gray-400">
+            No Albums yet. Create your first Album!
+          </p>
+        )}
+        {error && <p role="alert">{error}</p>}
+      </section>
+    </>
   );
 }
 

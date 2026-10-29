@@ -27,9 +27,8 @@ function SearchInput({ onSearch }) {
           placeholder="Search..."
           value={searchTerm}
           onChange={handleChange}
-          className="search-input"
+          className="search-input font-['Love_Ya_Like_A_Sister']"
         />
-        
       </form>
     </div>
   );

@@ -71,9 +71,10 @@ function AlbumComponent(props) {
 
   return (
     <article
-      className="box-border grid aspect-[1543/1786] w-full max-w-[400px] grid-rows-[auto_minmax(0,1fr)_auto_auto] gap-3 overflow-hidden bg-center bg-no-repeat bg-[length:100%_100%] px-8 pb-8 pt-[164px] font-['Love_Ya_Like_A_Sister'] text-white drop-shadow-lg"
+      className="relative box-border grid aspect-[1543/1786] w-full max-w-[400px] grid-rows-[auto_minmax(0,1fr)_auto_auto] gap-3 overflow-hidden bg-center bg-no-repeat bg-[length:100%_100%] px-8 pb-8 pt-[164px] font-['Love_Ya_Like_A_Sister'] text-white drop-shadow-lg"
       style={{ backgroundImage: `url(${greenNote})` }}
     >
+      {props.delete}
       <Link
         className="max-w-full text-white"
         to={`/albums/${props.id}`}

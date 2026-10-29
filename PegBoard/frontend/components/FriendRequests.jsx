@@ -78,11 +78,17 @@ function FriendRequests() {
     <section className="profile-content-card friend-requests-section">
       <h2>Friend requests</h2>
       {!user?.id ? (
-        <p>Please log in to view friend requests.</p>
+        <p className="font-['Love_Ya_Like_A_Sister']">
+          Please log in to view friend requests.
+        </p>
       ) : loading ? (
-        <p>Loading friend requests...</p>
+        <p className="font-['Love_Ya_Like_A_Sister']">
+          Loading friend requests...
+        </p>
       ) : error && visibleRequests.length === 0 ? (
-        <p role="alert">{error}</p>
+        <p role="alert" className="font-['Love_Ya_Like_A_Sister']">
+          {error}
+        </p>
       ) : visibleRequests.length > 0 ? (
         <div className="friends-list">
           {visibleRequests.map((request) => (
@@ -108,7 +114,9 @@ function FriendRequests() {
           ))}
         </div>
       ) : (
-        <p>No pending friend requests.</p>
+        <p className="font-['Love_Ya_Like_A_Sister'] text-gray-400">
+          No pending friend requests.
+        </p>
       )}
       {error && visibleRequests.length > 0 && <p role="alert">{error}</p>}
     </section>

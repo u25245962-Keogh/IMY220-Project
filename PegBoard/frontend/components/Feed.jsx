@@ -1,8 +1,11 @@
 import PostComponent from "./PostComponent";
 import "../styles/Posts.css";
 import sortByDateDescending from "../utils/sortByDate";
+import { useAuth } from "../context/AuthContext";
+import DeletePost from "./DeletePost";
 
-function Feed({posts}) {
+function Feed({ posts, onDelete }) {
+  const { user } = useAuth();
   const sortedPosts = sortByDateDescending(posts);
 
   return (
@@ -18,6 +21,9 @@ function Feed({posts}) {
             caption={post.caption}
             hashtags={post.hastags ?? post.hashtags}
             userId={post.userId}
+            delete={user?.username === "Admin" && (
+              <DeletePost postId={post._id} onDelete={onDelete} />
+            )}
           />
         ))}
       </div>

@@ -2,7 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = () => {
-  // Replace this with your actual auth logic (e.g., context, redux, or localStorage)
+  
   const { user } = useAuth();
 
   // If not authenticated, redirect to the login page

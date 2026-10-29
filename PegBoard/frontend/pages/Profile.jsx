@@ -24,11 +24,14 @@ function Profile() {
     }
 
     const imageStorageKey = `profileImage:${userId}`;
+    const profileData = new FormData();
+    Object.entries(updates).forEach(([field, value]) => {
+      profileData.append(field, value);
+    });
 
     const response = await fetch(`http://localhost:3000/api/users/${encodeURIComponent(userId)}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
+      body: profileData,
     });
     const result = await response.json();
 
@@ -59,27 +62,21 @@ function Profile() {
       throw new Error("Please log in before creating a post.");
     }
 
-    const createdAt = new Date();
-    const date = [
-      String(createdAt.getDate()).padStart(2, "0"),
-      String(createdAt.getMonth() + 1).padStart(2, "0"),
-      createdAt.getFullYear(),
-    ].join("-");
+    const postData = new FormData();
+    postData.append("caption", formData.caption);
+    postData.append("postUser", user.username);
+    postData.append("userId", formData.userId);
+    postData.append(
+      "hastags",
+      JSON.stringify(formData.Hashtags.split(/[\s,]+/).filter(Boolean)),
+    );
+    if (formData.image) {
+      postData.append("image", formData.image);
+    }
 
-    const postData = {
-      caption: formData.caption,
-      image: formData.image,
-      postUser: user.username,
-      userId: formData.userId,
-      hastags: formData.Hashtags.split(/[\s,]+/).filter(Boolean),
-      date,
-    };
     const response = await fetch("http://localhost:3000/api/posts", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(postData),
+      body: postData,
     });
     const contentType = response.headers.get("content-type") ?? "";
     if (!contentType.includes("application/json")) {
@@ -102,48 +99,48 @@ function Profile() {
       <Navbar name="Profile"></Navbar>
       <main className="profile-page">
         <div className="profile-content">
-        <section className="profile-section">
-          <ProfileComponent refreshKey={profileRefreshKey} />
-          <button
-            type="button"
-            className="edit-profile-btn"
-            onClick={() => setShowEditProfile(!showEditProfile)}
-          >
-            {showEditProfile ? "Cancel" : "Edit Profile"}
-          </button>
-        </section>
-
-        {showEditProfile && (
-          <section className="edit-profile-section">
-            <EditProfile onSave={handleSaveProfile} />
+          <section className="profile-section">
+            <ProfileComponent refreshKey={profileRefreshKey} />
+            <button
+              type="button"
+              className="edit-profile-btn"
+              onClick={() => setShowEditProfile(!showEditProfile)}
+            >
+              {showEditProfile ? "Cancel" : "Edit Profile"}
+            </button>
           </section>
-        )}
 
-        <section className="create-post-section profile-create-post">
-          <button
-            type="button"
-            className="create-post-toggle-btn"
-            onClick={() => setShowCreatePost(!showCreatePost)}
-          >
-            {showCreatePost ? "Cancel" : "Create New Post"}
-          </button>
-          {showCreatePost && (
-            <CreatePost onSubmit={handleCreatePost} userId={userId} />
+          {showEditProfile && (
+            <section className="edit-profile-section">
+              <EditProfile onSave={handleSaveProfile} />
+            </section>
           )}
-        </section>
 
-        <section className="user-posts-section profile-content-card">
-          <UserPosts refreshKey={postsRefreshKey} />
-        </section>
+          <section className="create-post-section profile-create-post">
+            <button
+              type="button"
+              className="create-post-toggle-btn"
+              onClick={() => setShowCreatePost(!showCreatePost)}
+            >
+              {showCreatePost ? "Cancel" : "Create New Post"}
+            </button>
+            {showCreatePost && (
+              <CreatePost onSubmit={handleCreatePost} userId={userId} />
+            )}
+          </section>
 
-        <section className="profile-content-card">
-          <ProfileAlbums />
-        </section>
+          <section className="user-posts-section profile-content-card font-['Love_Ya_Like_A_Sister']">
+            <UserPosts refreshKey={postsRefreshKey} />
+          </section>
 
-        <section className="friends-section profile-content-card">
-          <Friends />
-        </section>
-        <FriendRequests />
+          <section className="">
+            <ProfileAlbums />
+          </section>
+
+          <section className="friends-section profile-content-card">
+            <Friends />
+          </section>
+          <FriendRequests />
         </div>
       </main>
     </>

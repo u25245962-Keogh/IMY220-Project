@@ -18,9 +18,17 @@ function EditProfile({ onSave }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState(emptyProfile);
   const [originalData, setOriginalData] = useState(emptyProfile);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+  }, [imagePreview]);
 
   useEffect(() => {
     let active = true;
@@ -95,23 +103,9 @@ function EditProfile({ onSave }) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result !== "string") {
-        setError("Could not read the selected image.");
-        return;
-      }
-
-      setFormData((currentData) => ({
-        ...currentData,
-        image: reader.result,
-      }));
-      setError("");
-    };
-    reader.onerror = () => {
-      setError("Could not read the selected image.");
-    };
-    reader.readAsDataURL(file);
+    setSelectedImage(file);
+    setImagePreview(URL.createObjectURL(file));
+    setError("");
   };
 
   const handleSubmit = async (event) => {
@@ -119,8 +113,13 @@ function EditProfile({ onSave }) {
     setError("");
 
     const updates = Object.fromEntries(
-      Object.entries(formData).filter(([field, value]) => value !== originalData[field]),
+      Object.entries(formData)
+        .filter(([field]) => field !== "image")
+        .filter(([field, value]) => value !== originalData[field]),
     );
+    if (selectedImage) {
+      updates.image = selectedImage;
+    }
     if (Object.keys(updates).length === 0) {
       setError("Update at least one profile field before saving.");
       return;
@@ -130,6 +129,8 @@ function EditProfile({ onSave }) {
     try {
       await onSave(updates);
       setOriginalData(formData);
+      setSelectedImage(null);
+      setImagePreview("");
     } catch (saveError) {
       setError(saveError.message || "Could not save profile details.");
     } finally {
@@ -211,9 +212,9 @@ function EditProfile({ onSave }) {
             accept="image/jpeg,image/png,image/gif,image/webp"
             onChange={handleImageChange}
           />
-          {formData.image && (
+          {(imagePreview || formData.image) && (
             <img
-              src={formData.image}
+              src={imagePreview || formData.image}
               alt="Profile picture preview"
               className="profile-img profile-edit-preview"
             />

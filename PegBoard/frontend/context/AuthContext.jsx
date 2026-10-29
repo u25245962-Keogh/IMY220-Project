@@ -5,7 +5,7 @@ const USER_STORAGE_KEY = "pegboard:user";
 
 function getStoredUser() {
   try {
-    const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+    const storedUser = sessionStorage.getItem(USER_STORAGE_KEY);
     if (!storedUser) {
       return null;
     }
@@ -32,9 +32,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     try {
       if (user) {
-        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+        sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
       } else {
-        localStorage.removeItem(USER_STORAGE_KEY);
+        sessionStorage.removeItem(USER_STORAGE_KEY);
       }
     } catch (error) {
       console.error("Could not persist the logged-in user:", error);

@@ -100,12 +100,8 @@ function Friends({ friends }) {
   }, [friendsKey, hasFriendIds]);
 
   return (
-    <div className="friends-container">
-      <h3>
-        Friends (
-        {isLoading ? "..." : displayFriends.length}
-        )
-      </h3>
+    <div className="friends-container ">
+      <h3>Friends ({isLoading ? "..." : displayFriends.length})</h3>
       {error && <p role="alert">{error}</p>}
       {hasFriendIds && friendLookupError && (
         <p role="alert">{friendLookupError}</p>
@@ -113,7 +109,8 @@ function Friends({ friends }) {
       <div className="friends-list">
         {displayFriends.map((friend, index) => {
           const friendReference = friend?._id ?? friend?.id ?? friend;
-          const friendName = friend?.username ||
+          const friendName =
+            friend?.username ||
             (typeof friendReference === "string"
               ? friendUsernames[friendReference] || friendReference
               : friend?.name || "Unknown user");
@@ -122,13 +119,13 @@ function Friends({ friends }) {
               key={friendReference ?? friendName ?? index}
               className="friend-card"
             >
-              <p>{friendName}</p>
+              <p className="font-['Love_Ya_Like_A_Sister']">{friendName}</p>
             </div>
           );
         })}
       </div>
       {!isLoading && !error && displayFriends.length === 0 && (
-        <p>No friends yet.</p>
+        <p className="font-['Love_Ya_Like_A_Sister']">No friends yet.</p>
       )}
     </div>
   );
