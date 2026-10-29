@@ -6,6 +6,7 @@ import UserPosts from "../components/UserPosts";
 import Friends from "../components/Friends";
 import CreatePost from "../components/CreatePost";
 import ProfileAlbums from "../components/ProfileAlbums";
+import FriendRequests from "../components/FriendRequests";
 import { useAuth } from "../context/AuthContext";
 import "../styles/profile.css";
 
@@ -142,6 +143,7 @@ function Profile() {
         <section className="friends-section profile-content-card">
           <Friends />
         </section>
+        <FriendRequests />
         </div>
       </main>
     </>

@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import UserPosts from "../components/UserPosts";
 import FeedAlbums from "../components/FeedAlbums";
 import Friends from "../components/Friends";
+import { useAuth } from "../context/AuthContext";
 import "../styles/profile.css";
 import {
   getCachedProfileImage,
@@ -16,7 +17,13 @@ function OtherProfile() {
   const [error, setError] = useState("");
   const [albumsError, setAlbumsError] = useState("");
   const [albumsLoading, setAlbumsLoading] = useState(true);
+  const [isFriend, setIsFriend] = useState(false);
+  const [friendshipLoading, setFriendshipLoading] = useState(true);
+  const [friendActionLoading, setFriendActionLoading] = useState(false);
+  const [friendActionError, setFriendActionError] = useState("");
+  const [friendActionMessage, setFriendActionMessage] = useState("");
   const { id: profileId } = useParams();
+  const { user } = useAuth();
 
   useEffect(() => {
     let isActive = true;
@@ -25,6 +32,9 @@ function OtherProfile() {
     setAlbums([]);
     setAlbumsError("");
     setAlbumsLoading(true);
+    setFriendshipLoading(Boolean(user?.id));
+    setFriendActionError("");
+    setFriendActionMessage("");
 
     const fetchProfile = async () => {
       try {
@@ -39,6 +49,30 @@ function OtherProfile() {
 
         if (!isActive) return;
         setProfile(data);
+
+        if (user?.id && String(user.id) !== String(data._id)) {
+          const ownProfileResponse = await fetch(
+            `http://localhost:3000/api/users/${encodeURIComponent(user.id)}`,
+          );
+          const ownProfile = await ownProfileResponse.json();
+          if (!ownProfileResponse.ok) {
+            throw new Error(ownProfile.message || "Unable to check your friends.");
+          }
+          if (isActive) {
+            const ownFriends = Array.isArray(ownProfile.friends)
+              ? ownProfile.friends
+              : [];
+            setIsFriend(
+              ownFriends.some(
+                (friend) =>
+                  String(friend?._id ?? friend?.id ?? friend) === String(data._id) ||
+                  String(friend?._id ?? friend?.id ?? friend) === data.username,
+              ),
+            );
+          }
+        } else if (isActive) {
+          setIsFriend(false);
+        }
 
         try {
           const albumsResponse = await fetch("http://localhost:3000/api/albums");
@@ -68,6 +102,7 @@ function OtherProfile() {
       } finally {
         if (isActive) {
           setAlbumsLoading(false);
+          setFriendshipLoading(false);
         }
       }
     };
@@ -77,7 +112,48 @@ function OtherProfile() {
     return () => {
       isActive = false;
     };
-  }, [profileId]);
+  }, [profileId, user?.id]);
+
+  const handleFriendAction = async () => {
+    if (!user?.id || !profile?._id) return;
+
+    setFriendActionLoading(true);
+    setFriendActionError("");
+    setFriendActionMessage("");
+    try {
+      const response = await fetch(
+        isFriend
+          ? `http://localhost:3000/api/users/${encodeURIComponent(user.id)}/friends/${encodeURIComponent(profile._id)}`
+          : `http://localhost:3000/api/users/${encodeURIComponent(profile._id)}/requests`,
+        {
+          method: isFriend ? "DELETE" : "POST",
+          ...(isFriend
+            ? {}
+            : {
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ requesterId: user.id }),
+              }),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Unable to update this friendship.");
+      }
+
+      if (isFriend) {
+        setIsFriend(false);
+        setFriendActionMessage("Friend removed.");
+      } else {
+        setFriendActionMessage("Friend request sent.");
+      }
+    } catch (actionError) {
+      setFriendActionError(
+        actionError.message || "Unable to update this friendship.",
+      );
+    } finally {
+      setFriendActionLoading(false);
+    }
+  };
 
   if (error) {
     return (
@@ -110,6 +186,12 @@ function OtherProfile() {
   const profileImage = resolveProfileImageUrl(
     profile.image || getCachedProfileImage(profile._id),
   );
+  const hasPendingRequest = Array.isArray(profile.requests) &&
+    profile.requests.some(
+      (requester) =>
+        String(requester?._id ?? requester?.id ?? requester) === String(user?.id) ||
+        String(requester?._id ?? requester?.id ?? requester) === user?.username,
+    );
 
   return (
     <>
@@ -133,6 +215,37 @@ function OtherProfile() {
                 {bio && <p>{bio}</p>}
               </div>
             </div>
+            {user?.id && String(user.id) !== String(profile._id) && (
+              <div>
+                <button
+                  type="button"
+                  className="profile-submit-button"
+                  onClick={handleFriendAction}
+                  disabled={
+                    friendshipLoading ||
+                    friendActionLoading ||
+                    (!isFriend && hasPendingRequest)
+                  }
+                >
+                  {friendActionLoading
+                    ? "Please wait..."
+                    : isFriend
+                      ? "Remove friend"
+                      : hasPendingRequest ||
+                          friendActionMessage === "Friend request sent."
+                        ? "Request sent"
+                        : "Send friend request"}
+                </button>
+                {friendActionError && (
+                  <p role="alert" className="text-sm font-medium text-red-700">
+                    {friendActionError}
+                  </p>
+                )}
+                {friendActionMessage && (
+                  <p role="status">{friendActionMessage}</p>
+                )}
+              </div>
+            )}
           </section>
 
           <section className="user-posts-section profile-content-card">

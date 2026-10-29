@@ -241,7 +241,7 @@ app.get(`/api/users`, async (req, res) => {
 
     // Add the post query here, using the route id as needed.
    // const query = {id : id};
-    const post = await collection.find().toArray();
+    const post = await collection.find({}, { projection: { _id: 1, username: 1 } }).toArray();
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
@@ -662,7 +662,11 @@ app.post("/api/users/:id/requests", async (req, res) => {
     if (!recipient || !requester) {
       return res.status(404).json({ message: "User not found" });
     }
-    if ((recipient.friends ?? []).some((id) => id.toString() === requesterId)) {
+    if (
+      (recipient.friends ?? []).some(
+        (id) => id.toString() === requesterId || id.toString() === requester.username,
+      )
+    ) {
       return res.status(409).json({ message: "Users are already friends" });
     }
 
@@ -690,11 +694,24 @@ app.get("/api/users/:id/requests", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const requestIds = (user.requests ?? []).map((id) =>
-      ObjectId.isValid(id) ? new ObjectId(id) : null,
-    ).filter(Boolean);
-    const requests = requestIds.length
-      ? await collection.find({ _id: { $in: requestIds } }, { projection: { password: 0 } }).toArray()
+    const requestReferences = user.requests ?? [];
+    const requestIds = requestReferences
+      .filter((id) => ObjectId.isValid(id))
+      .map((id) => new ObjectId(id));
+    const requestUsernames = requestReferences
+      .filter((reference) => typeof reference === "string" && !ObjectId.isValid(reference));
+    const requestQuery = [];
+    if (requestIds.length) {
+      requestQuery.push({ _id: { $in: requestIds } });
+    }
+    if (requestUsernames.length) {
+      requestQuery.push({ username: { $in: requestUsernames } });
+    }
+    const requests = requestQuery.length
+      ? await collection.find(
+          { $or: requestQuery },
+          { projection: { password: 0 } },
+        ).toArray()
       : [];
     return res.status(200).json(requests);
   } catch (error) {
@@ -722,19 +739,65 @@ app.post("/api/users/:id/requests/:requesterId/accept", async (req, res) => {
     if (!user || !sender) {
       return res.status(404).json({ message: "User not found" });
     }
-    if (!(user.requests ?? []).some((requestId) => requestId.toString() === requesterId)) {
+    if (
+      !(user.requests ?? []).some(
+        (requestId) =>
+          requestId.toString() === requesterId ||
+          requestId.toString() === sender.username,
+      )
+    ) {
       return res.status(404).json({ message: "Friend request not found" });
     }
 
     await collection.updateOne(
       { _id: userId },
-      { $pull: { requests: senderId }, $addToSet: { friends: senderId } },
+      {
+        $pull: { requests: { $in: [senderId, sender.username] } },
+        $addToSet: { friends: senderId },
+      },
     );
     await collection.updateOne(
       { _id: senderId },
       { $addToSet: { friends: userId } },
     );
     return res.status(200).json({ message: "Friend request accepted" });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.delete("/api/users/:id/requests/:requesterId", async (req, res) => {
+  try {
+    const { id, requesterId } = req.params;
+    if (!ObjectId.isValid(id) || !ObjectId.isValid(requesterId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const collection = getDB().collection("users");
+    const userId = new ObjectId(id);
+    const senderId = new ObjectId(requesterId);
+    const [user, sender] = await Promise.all([
+      collection.findOne({ _id: userId }),
+      collection.findOne({ _id: senderId }),
+    ]);
+    if (!user || !sender) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (
+      !(user.requests ?? []).some(
+        (requestId) =>
+          requestId.toString() === requesterId ||
+          requestId.toString() === sender.username,
+      )
+    ) {
+      return res.status(404).json({ message: "Friend request not found" });
+    }
+
+    await collection.updateOne(
+      { _id: userId },
+      { $pull: { requests: { $in: [senderId, sender.username] } } },
+    );
+    return res.status(200).json({ message: "Friend request rejected" });
   } catch (error) {
     return res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -758,8 +821,14 @@ app.delete("/api/users/:id/friends/:friendId", async (req, res) => {
     }
 
     await Promise.all([
-      collection.updateOne({ _id: userId }, { $pull: { friends: otherId } }),
-      collection.updateOne({ _id: otherId }, { $pull: { friends: userId } }),
+      collection.updateOne(
+        { _id: userId },
+        { $pull: { friends: { $in: [otherId, friend.username] } } },
+      ),
+      collection.updateOne(
+        { _id: otherId },
+        { $pull: { friends: { $in: [userId, user.username] } } },
+      ),
     ]);
     return res.status(200).json({ message: "Friend removed" });
   } catch (error) {
